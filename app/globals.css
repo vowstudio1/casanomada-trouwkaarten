@@ -29,10 +29,9 @@ body {
 .animate-fade-up {
   animation: fadeUp 0.7s ease both;
 }
-.animate-fade-up-delay-1 { animation-delay: 0.1s; }
-.animate-fade-up-delay-2 { animation-delay: 0.2s; }
-.animate-fade-up-delay-3 { animation-delay: 0.3s; }
-.animate-fade-up-delay-4 { animation-delay: 0.4s; }
+.animate-fade-up-delay-1 { animation-delay: 0.15s; }
+.animate-fade-up-delay-2 { animation-delay: 0.3s; }
+.animate-fade-up-delay-3 { animation-delay: 0.45s; }
 
 /* accordion transitions */
 .accordion-content {
@@ -42,16 +41,50 @@ body {
 
 /* card hover lift */
 .card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(89,38,47,0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(89,38,47,0.10);
 }
 
 /* phone card mockup */
 .phone-card {
   border-radius: 2rem;
   overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* horizontal scroll strip */
+.template-strip {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+}
+.template-strip::-webkit-scrollbar { display: none; }
+.template-strip > * { scroll-snap-align: start; flex-shrink: 0; }
+
+/* comparison table */
+.comparison-table th,
+.comparison-table td {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+}
+.comparison-table thead th {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 500;
+}
+.comparison-table tbody tr {
+  border-top: 1px solid #f3f3f0;
+}
+.comparison-table tbody td:not(:first-child) {
+  text-align: center;
+}
+.comparison-table thead th:not(:first-child) {
+  text-align: center;
 }
