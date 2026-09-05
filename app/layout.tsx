@@ -1,26 +1,12 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-
-export const metadata: Metadata = {
-  title: `${SITE_NAME} — Digitale trouwkaarten`,
-  description: SITE_DESCRIPTION,
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { Playfair_Display, Inter } from 'next/font/google';
+import './globals.css';
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+export const metadata = { title: 'Casanomada Trouwkaarten | Digitale Uitnodigingen', description: 'Jullie mooiste uitnodiging, jullie eenvoudigste reacties.' };
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl">
-      <body className="antialiased">
-        <Header />
-        {children}
-        <Footer />
-      </body>
+    <html lang="nl" className={`${playfair.variable} ${inter.variable}`}>
+      <body className="bg-cream-50 text-charcoal-900 font-sans antialiased">{children}</body>
     </html>
   );
 }
