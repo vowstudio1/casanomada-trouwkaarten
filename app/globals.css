@@ -24,6 +24,30 @@ h1, h2, h3, h4 {
   }
 }
 
+/* ─── CSS Animations ─── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDelay {
+  0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out both;
+}
+
+.animate-fade-in-delay {
+  animation: fadeInDelay 1s ease-out 0.3s both;
+}
+
+/* Scroll-triggered fade in via IntersectionObserver fallback */
+.animate-on-scroll {
+  opacity: 1;
+}
+
 /* Envelope animation */
 @keyframes envelope-open {
   0% { transform: rotateX(0deg); }
