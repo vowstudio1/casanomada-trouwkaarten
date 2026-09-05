@@ -19,24 +19,24 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const templates = [
-  { name: "Romantisch Rood",   bg: "bg-rose-50",    accent: "bg-brand-800", accentHex: "#59262F", desc: "Klassiek en warm, tijdloze romantiek." },
-  { name: "Modern Wit",        bg: "bg-gray-50",    accent: "bg-gray-800",  accentHex: "#1f2937", desc: "Strak en minimaal, ruimte en adem." },
-  { name: "Botanisch Groen",   bg: "bg-emerald-50", accent: "bg-emerald-800", accentHex: "#065f46", desc: "Bladeren en bloemen, delicaat." },
-  { name: "Gouden Glans",      bg: "bg-amber-50",   accent: "bg-amber-700", accentHex: "#b45309", desc: "Warm avondlicht, romantisch en intiem." },
-  { name: "Lavendel Droom",    bg: "bg-purple-50",  accent: "bg-purple-800", accentHex: "#6b21a8", desc: "Zacht en dromerig, paarse tinten." },
-  { name: "Zeeblauw",          bg: "bg-sky-50",     accent: "bg-sky-800",   accentHex: "#075985", desc: "Fris en kust, zomerse sfeer." },
-  { name: "Dusty Rose",        bg: "bg-pink-50",    accent: "bg-pink-800",  accentHex: "#9d174d", desc: "Poederroze, subtiel en verfijnd." },
-  { name: "Terracotta",        bg: "bg-orange-50",  accent: "bg-orange-800", accentHex: "#9a3412", desc: "Aards en warm, mediterrane tonen." },
-  { name: "Salie Groen",       bg: "bg-green-50",   accent: "bg-green-700", accentHex: "#15803d", desc: "Natuurlijk groen, rustgevend." },
-  { name: "Ivoor & Goud",      bg: "bg-yellow-50",  accent: "bg-yellow-700", accentHex: "#a16207", desc: "Luxueus en feestelijk, gouden accenten." },
-  { name: "Midnight Blue",     bg: "bg-blue-50",    accent: "bg-blue-900",  accentHex: "#1e3a5f", desc: "Diep en elegant, avondsfeer." },
-  { name: "Blush & Nude",      bg: "bg-rose-50",    accent: "bg-rose-700",  accentHex: "#be123c", desc: "Zacht en verfijnd, neutrale tinten." },
-  { name: "Olijfgroen",        bg: "bg-lime-50",    accent: "bg-lime-800",  accentHex: "#3f6212", desc: "Toscaans en rustiek, en plein air." },
-  { name: "Warm Taupe",        bg: "bg-stone-50",   accent: "bg-stone-700", accentHex: "#44403c", desc: "Beige en oud goud, bloemrijk." },
-  { name: "Koraalrood",        bg: "bg-red-50",     accent: "bg-red-700",   accentHex: "#b91c1c", desc: "Zonnig en levendig, zomerfeest." },
-  { name: "Indigo Nacht",      bg: "bg-indigo-50",  accent: "bg-indigo-800", accentHex: "#3730a3", desc: "Mysterieus en romantisch, nachtblauw." },
-  { name: "Champagne",         bg: "bg-amber-50",   accent: "bg-amber-600", accentHex: "#d97706", desc: "Sprankelend en feestelijk, gouden bubbels." },
-  { name: "Klassiek Zwart",    bg: "bg-zinc-100",   accent: "bg-zinc-900",  accentHex: "#18181b", desc: "Tijdloos en sophisticated, zwart-wit." },
+  { name: "Volta Celeste",         img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
+  { name: "Strawberry Matcha",     img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-a6eb8665.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
+  { name: "Tratto d'Inchiostro",   img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftratto-inchiostro-en-vetrina-48f6d0e0.jpg&w=1200&q=75", desc: "Penlijnen op papier, een enkele inkt." },
+  { name: "Toile de Jouy",         img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftoile-bleu-en-vetrina-a0fc5d6a.jpg&w=1200&q=75", desc: "Toile in vier tinten op creme papier." },
+  { name: "Idillio",               img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fidillio-en-vetrina-4806113a.jpg&w=1200&q=75", desc: "Gouden strik en zwanen, alles licht." },
+  { name: "Villa Cortina",         img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-cortina-en-vetrina-553a7717.jpg&w=1200&q=75", desc: "Het gordijn opent de zaal, kant en kristal." },
+  { name: "Romantisch Botanisch",  img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbotanico-romantico-en-vetrina-5a476f93.jpg&w=1200&q=75", desc: "Bladeren en bloemen, delicaat." },
+  { name: "Tuscany Chic",          img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftuscany-chic-en-vetrina-6c591e8d.jpg&w=1200&q=75", desc: "Warm en verfijnd, en plein air." },
+  { name: "De Geheime Tuin",       img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-segreto-en-vetrina-25ee18b2.jpg&w=1200&q=75", desc: "Rozenboog en Italiaanse tuin." },
+  { name: "Betoverd Bos",          img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fincanto-nel-bosco-en-vetrina-6c056d35.jpg&w=1200&q=75", desc: "Geschilderd bos en wilde rozen." },
+  { name: "Zomertuin",             img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-16e90ec0.jpg&w=1200&q=75", desc: "Groene tuin en roze kant." },
+  { name: "Het Zwanenmeer",        img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Flago-dei-cigni-en-vetrina-4b04abc9.jpg&w=1200&q=75", desc: "Romantisch en luchtig, zachte tinten." },
+  { name: "Riviera 70",            img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Friviera-70-en-vetrina-5a764ed8.jpg&w=1200&q=75", desc: "Zonnig en vintage, jaren 70-sfeer." },
+  { name: "Gouden Uur",            img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftipografico-moderno-en-vetrina-2c921489.jpg&w=1200&q=75", desc: "Warm avondlicht, romantisch en intiem." },
+  { name: "Italiaanse Aquarel",    img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Facquerello-italia-en-vetrina-3869b8cc.jpg&w=1200&q=75", desc: "Majolica en kust in aquarel." },
+  { name: "Minimale Couture",      img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fcouture-minimale-en-vetrina-4240eaa9.jpg&w=1200&q=75", desc: "Essentieel, ruimte en adem." },
+  { name: "Oro Antico",            img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Foro-antico-en-vetrina-22d36ceb.jpg&w=1200&q=75", desc: "Beige en oud goud, bloemrijk en elegant." },
+  { name: "Villa Aurora",          img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-aurora-en-vetrina-50b36ee0.jpg&w=1200&q=75", desc: "Terras bij zonsondergang, tijdloze luxe." },
 ];
 
 const templateNames = [
@@ -320,27 +320,19 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {templates.slice(0, 9).map((t, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {templates.map((t, i) => (
                 <div key={i} className="card-hover group cursor-pointer">
-                  <div className={`rounded-2xl ${t.bg} p-5 border border-white/80`}>
-                    {/* phone mockup inside card */}
-                    <div className="rounded-xl overflow-hidden bg-white shadow-sm">
-                      <div className={`${t.accent} h-24 flex flex-col items-center justify-end px-4 pb-3`}>
-                        <span className="text-white/60 text-[9px] font-sans tracking-[0.15em] uppercase mb-1.5">
-                          Uitnodiging
-                        </span>
-                        <span className="text-white font-serif text-xl font-light">A &amp; B</span>
-                      </div>
-                      <div className="p-4 text-center">
-                        <p className="font-sans text-[10px] text-text-muted mb-3">14 juni 2025</p>
-                        <div className={`${t.accent} rounded-full py-1.5 px-5 text-[9px] text-white font-sans inline-block tracking-[0.1em] uppercase`}>
-                          RSVP
-                        </div>
-                      </div>
-                    </div>
+                  <div className="rounded-2xl bg-cream overflow-hidden border border-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={t.img}
+                      alt={t.name}
+                      className="w-full h-auto object-cover"
+                      loading={i < 6 ? "eager" : "lazy"}
+                    />
                   </div>
-                  <div className="mt-3 px-1">
+                  <div className="mt-3 px-1 text-center">
                     <h3 className="font-serif text-base text-[#16161D] group-hover:text-brand-800 transition-colors">
                       {t.name}
                     </h3>
@@ -375,16 +367,18 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <div className="space-y-14">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative">
+              {/* connecting line */}
+              <div className="hidden md:block absolute top-[2.5rem] left-[calc(12.5%+1.5rem)] right-[calc(12.5%+1.5rem)] h-px bg-gray-200" />
               {steps.map((s, i) => (
-                <div key={i} className="flex gap-8">
-                  <div className="shrink-0 w-14 text-right">
-                    <span className="font-serif text-[2rem] font-semibold text-brand-800/25">{s.n}</span>
+                <div key={i} className="text-center md:text-left">
+                  <div className="flex justify-center md:justify-start mb-6">
+                    <div className="w-[3.5rem] h-[3.5rem] rounded-full bg-brand-800 flex items-center justify-center relative z-10">
+                      <span className="font-serif text-lg text-white">{s.n}</span>
+                    </div>
                   </div>
-                  <div className="pb-2">
-                    <h3 className="font-serif text-[1.35rem] text-[#16161D] mb-2.5">{s.title}</h3>
-                    <p className="font-sans text-[15px] text-text-muted leading-relaxed">{s.desc}</p>
-                  </div>
+                  <h3 className="font-serif text-[1.15rem] font-semibold text-[#16161D] mb-2">{s.title}</h3>
+                  <p className="font-sans text-[14px] text-text-muted leading-relaxed">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -822,17 +816,17 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════════
             FINAL CTA
         ══════════════════════════════════════════════════ */}
-        <section className="bg-cream py-[120px]">
+        <section className="bg-brand-800 py-[120px]">
           <div className="max-w-2xl mx-auto px-6 text-center">
-            <h2 className="font-serif text-[2.8rem] font-semibold text-[#16161D] mb-5 leading-tight">
+            <h2 className="font-serif text-[2.8rem] font-semibold text-white mb-5 leading-tight italic">
               Klaar om jullie uitnodiging te maken?
             </h2>
-            <p className="font-sans text-text-muted text-lg mb-10 leading-relaxed">
+            <p className="font-sans text-white/70 text-lg mb-10 leading-relaxed">
               Probeer het gratis. Jullie betalen pas wanneer jullie overtuigd zijn.
             </p>
             <Link
               href="/templates"
-              className="inline-flex items-center gap-2 bg-brand-800 text-white rounded-full px-10 py-4 font-sans text-[15px] font-medium hover:bg-brand-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-white text-brand-800 rounded-full px-10 py-4 font-sans text-[15px] font-medium hover:bg-cream transition-colors"
             >
               Maak jullie uitnodiging &mdash; gratis
               <ArrowRight size={16} />
