@@ -14,6 +14,7 @@ const fadeUp = {
 };
 
 const stagger = {
+  hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
