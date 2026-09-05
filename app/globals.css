@@ -2,20 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Roboto:wght@300;400;500&display=swap');
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #2d1209;
-  background-color: #faf7f2;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  color: #16161d;
+  background-color: #fff;
 }
 
 h1, h2, h3, h4 {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
 }
 
 @layer utilities {
@@ -43,7 +43,6 @@ h1, h2, h3, h4 {
   animation: fadeInDelay 1s ease-out 0.3s both;
 }
 
-/* Scroll-triggered fade in via IntersectionObserver fallback */
 .animate-on-scroll {
   opacity: 1;
 }
@@ -59,13 +58,17 @@ h1, h2, h3, h4 {
   animation: envelope-open 1s ease-out forwards;
 }
 
-/* Subtle gradient bg */
+/* Backgrounds */
 .bg-gradient-warm {
-  background: linear-gradient(180deg, #faf7f2 0%, #fff 50%, #faf7f2 100%);
+  background: linear-gradient(180deg, #fff 0%, #fafaf8 50%, #fff 100%);
+}
+
+.bg-cream {
+  background-color: #fafaf8;
 }
 
 /* Sticky CTA bar */
 .sticky-cta {
   backdrop-filter: blur(12px);
-  background: rgba(250, 247, 242, 0.9);
+  background: rgba(255, 255, 255, 0.92);
 }
