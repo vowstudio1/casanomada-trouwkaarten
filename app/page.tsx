@@ -8,11 +8,7 @@ import {
   Plus,
   Mail,
   Send,
-  Users,
-  Globe,
-  Leaf,
-  Clock,
-  Sparkles,
+  Star,
 } from "lucide-react";
 import FAQAccordion from "@/components/FAQAccordion";
 
@@ -377,7 +373,7 @@ export default function HomePage() {
                   <div className=”flex items-start justify-between mb-6”>
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.dark ? “bg-white/15” : “bg-cream”}`}>
                       {item.icon === “Heart” && <Heart size={20} className={item.dark ? “text-white” : “text-brand-800”} />}
-                      {item.icon === “Users” && <Users size={20} className=”text-brand-800” />}
+                      {item.icon === “Users” && <Mail size={20} className=”text-brand-800” />}
                       {item.icon === “Check” && <Check size={20} className=”text-brand-800” />}
                     </div>
                     <span className={`font-serif text-[2.5rem] leading-none ${item.dark ? “text-white/20” : “text-gray-200”}`}>{item.n}</span>
@@ -399,11 +395,11 @@ export default function HomePage() {
               ].map((f, i) => (
                 <div key={i} className=”bg-white rounded-2xl p-6 border border-gray-100 flex gap-4”>
                   <div className=”w-10 h-10 rounded-full bg-cream shrink-0 flex items-center justify-center”>
-                    {f.icon === “Globe” && <Globe size={18} className=”text-brand-800” />}
-                    {f.icon === “Leaf” && <Leaf size={18} className=”text-brand-800” />}
-                    {f.icon === “Clock” && <Clock size={18} className=”text-brand-800” />}
+                    {f.icon === “Globe” && <Check size={18} className=”text-brand-800” />}
+                    {f.icon === “Leaf” && <Heart size={18} className=”text-brand-800” />}
+                    {f.icon === “Clock” && <ArrowRight size={18} className=”text-brand-800” />}
                     {f.icon === “Mail” && <Mail size={18} className=”text-brand-800” />}
-                    {f.icon === “Sparkles” && <Sparkles size={18} className=”text-brand-800” />}
+                    {f.icon === “Sparkles” && <Star size={18} className=”text-brand-800” />}
                   </div>
                   <div>
                     <h4 className=”font-serif text-[15px] font-semibold text-[#16161D] mb-1”>{f.title}</h4>
@@ -439,7 +435,7 @@ export default function HomePage() {
                 >
                   {p.highlight && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-[10px] font-sans tracking-[0.15em] uppercase bg-brand-800 text-white rounded-full px-4 py-1.5 shadow-sm">
-                      <Sparkles size={10} /> Aanbevolen
+                      <Star size={10} /> Aanbevolen
                     </span>
                   )}
                   <p className="font-serif text-xl text-[#16161D] mb-4 text-center">
