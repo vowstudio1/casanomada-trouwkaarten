@@ -326,23 +326,23 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* ── RIGHT: phone mockup with real image ── */}
+              {/* ── RIGHT: iPhone mockup with real image ── */}
               <div className="animate-fade-up animate-fade-up-delay-1 flex flex-col items-center">
-                <div className="relative w-[280px] md:w-[320px] lg:w-[360px]">
-                  {/* phone frame */}
-                  <div className="rounded-[2.5rem] bg-[#16161D] p-[6px] shadow-2xl shadow-black/25">
-                    {/* notch */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100px] h-[24px] bg-[#16161D] rounded-b-2xl z-10" />
-                    {/* screen with real invitation image */}
-                    <div className="rounded-[2.2rem] overflow-hidden">
+                <div className="relative w-[200px] md:w-[220px] lg:w-[240px]">
+                  {/* iPhone frame — narrow 9:19.5 ratio */}
+                  <div className="rounded-[2.2rem] bg-[#16161D] p-[5px] shadow-2xl shadow-black/25">
+                    {/* dynamic island / notch */}
+                    <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[22px] bg-[#16161D] rounded-full z-10" />
+                    {/* screen */}
+                    <div className="rounded-[1.9rem] overflow-hidden" style={{ aspectRatio: "9/19.5" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="https://sponsalia.app/assets/marketing/templates/volta-celeste-en-vetrina-63b82e9f.jpg"
                         alt="Volta Celeste uitnodiging voorbeeld"
-                        className="w-full h-auto block"
-                        width={360}
-                        height={640}
-                        style={{ minHeight: "500px", objectFit: "cover", backgroundColor: "#e8e4df" }}
+                        className="w-full h-full object-cover object-top"
+                        width={240}
+                        height={520}
+                        style={{ backgroundColor: "#e8e4df" }}
                       />
                     </div>
                   </div>
