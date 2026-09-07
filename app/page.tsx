@@ -337,9 +337,11 @@ export default function HomePage() {
                     <div className="rounded-[2.2rem] overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=828&q=85"
+                        src="https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75"
                         alt="Volta Celeste uitnodiging voorbeeld"
                         className="w-full h-auto block"
+                        width={360}
+                        height={640}
                       />
                     </div>
                   </div>
