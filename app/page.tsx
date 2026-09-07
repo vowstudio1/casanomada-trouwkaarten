@@ -604,9 +604,7 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-center font-sans text-[10px] tracking-[0.15em] uppercase text-text-muted/40 mt-6">CASA NOMADA
-                  </div>
-                </div>
+                <p className="text-center font-sans text-[10px] tracking-[0.15em] uppercase text-text-muted/40 mt-6">CASA NOMADA</p>
               </div>
             </div>
           </div>
