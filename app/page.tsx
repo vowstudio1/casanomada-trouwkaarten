@@ -8,6 +8,11 @@ import {
   Plus,
   Mail,
   Send,
+  Users,
+  Globe,
+  Leaf,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 import FAQAccordion from "@/components/FAQAccordion";
 
@@ -397,48 +402,49 @@ export default function HomePage() {
               </h2>
             </div>
 
-            {/* large editorial numbered items */}
-            <div className="space-y-16 mb-20">
+            {/* 3 large feature cards (sponsalia-style: first burgundy, rest white) */}
+            <div className=”grid md:grid-cols-3 gap-6 mb-12”>
               {[
-                {
-                  n: "01",
-                  title: "Een uitnodiging die alleen van jullie is",
-                  desc: "Verfijnde typografie, smaakvolle kleurenpaletten, jullie eigen foto en jullie eigen lied: elk detail zegt “dit is onze dag”. Een uitnodiging met karakter die jullie met trots delen.",
-                },
-                {
-                  n: "02",
-                  title: "Een uitnodiging op maat voor elke gast",
-                  desc: "Elke groep krijgt een eigen uitnodiging, met de namen er al in en een persoonlijke link. Stuur ze een voor een, of deel een open link. Hoe dan ook voelt iedereen zich deel van jullie dag.",
-                },
-                {
-                  n: "03",
-                  title: "Alle antwoorden in een lijst",
-                  desc: "Aanwezigheid, dieetwensen, menukeuzes en kinderen werken zichzelf bij terwijl je gasten antwoorden. Geen bevestigingen meer verspreid over berichten en telefoontjes.",
-                },
+                { n: “01”, icon: “Heart”, title: “Een uitnodiging die alleen van jullie is”, desc: “Verfijnde typografie, smaakvolle kleurenpaletten, jullie eigen foto en jullie eigen lied: elk detail zegt „dit is onze dag”, geen standaardsjabloon. Een uitnodiging met karakter die jullie met trots delen.”, dark: true },
+                { n: “02”, icon: “Users”, title: “Een uitnodiging op maat voor elke gast”, desc: “Elke groep krijgt een eigen uitnodiging, met de namen er al in en een persoonlijke link. Stuur ze een voor een, of deel een open link en laat gasten zich zelf aanmelden. Hoe dan ook voelt iedereen zich deel van jullie dag.”, dark: false },
+                { n: “03”, icon: “Check”, title: “Alle antwoorden in een lijst”, desc: “Aanwezigheid, intoleranties, menukeuzes en kinderen werken zichzelf bij terwijl je gasten antwoorden. Geen bevestigingen meer verspreid over berichten en telefoontjes: alles staat in een lijst, altijd actueel en klaar voor de cateraar.”, dark: false },
               ].map((item, i) => (
-                <div key={i} className="flex gap-8 md:gap-12">
-                  <span className="font-serif text-[2.8rem] font-semibold text-brand-800/15 shrink-0 w-16 text-right leading-none pt-1">
-                    {item.n}
-                  </span>
-                  <div>
-                    <h3 className="font-serif text-[1.5rem] text-[#16161D] mb-3">{item.title}</h3>
-                    <p className="font-sans text-[15px] text-text-muted leading-relaxed">{item.desc}</p>
+                <div key={i} className={`rounded-2xl p-8 flex flex-col ${item.dark ? “bg-brand-800” : “bg-white border border-gray-200”}`}>
+                  <div className=”flex items-start justify-between mb-6”>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.dark ? “bg-white/15” : “bg-cream”}`}>
+                      {item.icon === “Heart” && <Heart size={20} className={item.dark ? “text-white” : “text-brand-800”} />}
+                      {item.icon === “Users” && <Users size={20} className=”text-brand-800” />}
+                      {item.icon === “Check” && <Check size={20} className=”text-brand-800” />}
+                    </div>
+                    <span className={`font-serif text-[2.5rem] leading-none ${item.dark ? “text-white/20” : “text-gray-200”}`}>{item.n}</span>
                   </div>
+                  <h3 className={`font-serif text-[1.25rem] font-semibold mb-3 ${item.dark ? “text-white” : “text-[#16161D]”}`}>{item.title}</h3>
+                  <p className={`font-sans text-[14px] leading-relaxed ${item.dark ? “text-white/75” : “text-text-muted”}`}>{item.desc}</p>
                 </div>
               ))}
             </div>
 
-            {/* smaller feature cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* smaller feature cards with icons */}
+            <div className=”grid sm:grid-cols-2 lg:grid-cols-3 gap-5”>
               {[
-                { title: "Elke gast in zijn eigen taal", desc: "Elke uitnodiging past zich automatisch aan de taal van wie hem opent." },
-                { title: "100% digitaal en milieuvriendelijk", desc: "Geen papier, geen drukwerk, geen verzending." },
-                { title: "Klaar in enkele minuten", desc: "Kies een sjabloon, vul jullie gegevens in, publiceer met een klik." },
-                { title: "Envelop met lakzegel", desc: "Elke uitnodiging opent met een envelop en lakzegel — een moment van verwachting." },
+                { icon: “Globe”, title: “Elke gast in zijn eigen taal”, desc: “Elke uitnodiging past zich automatisch aan de taal van wie hem opent.” },
+                { icon: “Leaf”, title: “100% digitaal en milieuvriendelijk”, desc: “Geen papier, geen drukwerk, geen verzending.” },
+                { icon: “Clock”, title: “Klaar in enkele minuten”, desc: “Kies een sjabloon, vul jullie gegevens in, publiceer met een klik.” },
+                { icon: “Mail”, title: “Envelop met lakzegel die opent bij aanraking”, desc: “Elke uitnodiging komt in een envelop met lakzegel die met een aanraking opent.” },
+                { icon: “Sparkles”, title: “Tafels geregeld met AI”, desc: “Typ of praat en de assistent plaatst alle gasten in 2 minuten.” },
               ].map((f, i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-50">
-                  <h4 className="font-serif text-base text-[#16161D] mb-2">{f.title}</h4>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed">{f.desc}</p>
+                <div key={i} className=”bg-white rounded-2xl p-6 border border-gray-100 flex gap-4”>
+                  <div className=”w-10 h-10 rounded-full bg-cream shrink-0 flex items-center justify-center”>
+                    {f.icon === “Globe” && <Globe size={18} className=”text-brand-800” />}
+                    {f.icon === “Leaf” && <Leaf size={18} className=”text-brand-800” />}
+                    {f.icon === “Clock” && <Clock size={18} className=”text-brand-800” />}
+                    {f.icon === “Mail” && <Mail size={18} className=”text-brand-800” />}
+                    {f.icon === “Sparkles” && <Sparkles size={18} className=”text-brand-800” />}
+                  </div>
+                  <div>
+                    <h4 className=”font-serif text-[15px] font-semibold text-[#16161D] mb-1”>{f.title}</h4>
+                    <p className=”font-sans text-xs text-text-muted leading-relaxed”>{f.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -465,41 +471,34 @@ export default function HomePage() {
               {plans.map((p, i) => (
                 <div
                   key={i}
-                  className={`rounded-2xl p-8 flex flex-col ${
-                    p.highlight
-                      ? "bg-brand-800 text-white shadow-xl shadow-brand-800/15 ring-2 ring-brand-800 relative"
-                      : "bg-cream border border-gray-100"
-                  }`}
+                  className="rounded-2xl bg-white border border-gray-200 p-8 flex flex-col relative"
                 >
                   {p.highlight && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-sans tracking-[0.15em] uppercase bg-white text-brand-800 rounded-full px-4 py-1 shadow-sm">
-                      Aanbevolen
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-[10px] font-sans tracking-[0.15em] uppercase bg-brand-800 text-white rounded-full px-4 py-1.5 shadow-sm">
+                      <Sparkles size={10} /> Aanbevolen
                     </span>
                   )}
-                  <p className={`font-serif text-xl mb-1 ${p.highlight ? "text-white" : "text-[#16161D]"}`}>
+                  <p className="font-serif text-xl text-[#16161D] mb-4 text-center">
                     {p.name}
                   </p>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <span className={`font-serif text-5xl ${p.highlight ? "text-white" : "text-[#16161D]"}`}>
+                  <div className="text-center mb-1">
+                    <span className="font-serif text-[3.5rem] text-[#16161D] leading-none">
                       &euro;{p.price}
                     </span>
                   </div>
-                  <p className={`font-sans text-xs mb-8 ${p.highlight ? "text-white/60" : "text-text-muted"}`}>
+                  <p className="font-sans text-[11px] tracking-[0.15em] uppercase text-text-muted text-center mb-8">
                     {p.desc}
                   </p>
 
-                  <ul className="space-y-2.5 mb-8 flex-1">
+                  <div className="border-t border-gray-100 mb-8" />
+
+                  <ul className="space-y-3 mb-8 flex-1">
                     {p.features.map((f, fi) => (
                       <li
                         key={fi}
-                        className={`flex items-start gap-2 font-sans text-sm leading-snug ${
-                          p.highlight ? "text-white/90" : "text-text-muted"
-                        }`}
+                        className="flex items-start gap-2.5 font-sans text-sm text-text-muted leading-snug"
                       >
-                        <Check
-                          size={14}
-                          className={`mt-0.5 shrink-0 ${p.highlight ? "text-white/70" : "text-brand-700"}`}
-                        />
+                        <Check size={16} className="mt-0.5 shrink-0 text-brand-700" />
                         {f}
                       </li>
                     ))}
@@ -507,11 +506,7 @@ export default function HomePage() {
 
                   <Link
                     href="/templates"
-                    className={`block text-center rounded-full py-3 font-sans text-sm font-medium transition-colors ${
-                      p.highlight
-                        ? "bg-white text-brand-800 hover:bg-cream"
-                        : "bg-brand-800 text-white hover:bg-brand-700"
-                    }`}
+                    className="block text-center rounded-full py-3.5 font-sans text-sm font-medium bg-brand-800 text-white hover:bg-brand-700 transition-colors"
                   >
                     {p.cta}
                   </Link>
@@ -629,54 +624,27 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* gastenboek card mockup */}
-              <div className="bg-cream rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="bg-brand-800 px-6 py-4 flex items-center justify-between">
-                  <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-white/80">
-                    Gastenboek
-                  </span>
-                  <Heart size={14} className="text-white/50" />
+              {/* PDF-style gastenboek mockup (like sponsalia "Thoughts for the couple") */}
+              <div className="bg-cream rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10">
+                <div className="text-center mb-8">
+                  <h3 className="font-serif text-2xl text-brand-800 italic mb-1">Gedachten voor het bruidspaar</h3>
+                  <p className="font-sans text-xs text-text-muted">Anna &amp; Thomas</p>
+                  <p className="font-sans text-[10px] tracking-[0.1em] uppercase text-text-muted/60 mt-1">14 september 2026</p>
+                  <div className="w-12 border-t border-brand-800/20 mx-auto mt-4" />
                 </div>
-                <div className="p-5 space-y-4">
+                <div className="space-y-6">
                   {[
-                    {
-                      name: "Mama & Papa",
-                      msg: "Wat een prachtig koppel! Wij wensen jullie een leven vol liefde en geluk.",
-                      t: "2 min geleden",
-                      color: "bg-brand-800",
-                    },
-                    {
-                      name: "Lisa & Mark",
-                      msg: "Gefeliciteerd! We zijn zo blij voor jullie. Op naar een geweldige dag!",
-                      t: "5 min geleden",
-                      color: "bg-purple-600",
-                    },
-                    {
-                      name: "Oma Riet",
-                      msg: "Lieve kinderen, mooier had het niet kunnen zijn. Veel geluk samen!",
-                      t: "12 min geleden",
-                      color: "bg-amber-600",
-                    },
+                    { quote: "Ik kijk naar jullie vandaag en zie het licht in jullie ogen. Het leven vliegt voorbij, mijn lievelingen: houd elkaars hand vast, ook als je elkaar niet begrijpt. Ik zal er altijd voor jullie zijn. Ik houd meer van jullie dan woorden kunnen zeggen.", from: "Oma Elena" },
+                    { quote: "We hebben je leren lopen door je handje vast te houden, en vandaag leg je die hand in de zijne. Je zult altijd ons kleine meisje blijven. We zijn zo trots op jullie beiden. Veel geluk met alle avonturen.", from: "Mama &amp; Papa" },
+                    { quote: "We hebben genoeg wilde avonden gehad samen, maar jullie liefde zien groeien is het mooiste van alles. We wensen jullie een leven vol lachen, reizen en dat prachtige warrige geluk. We houden van jullie!", from: "Lisa &amp; Mark" },
                   ].map((w, i) => (
-                    <div key={i} className="flex gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-white text-[10px] font-sans ${w.color}`}
-                      >
-                        {w.name[0]}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-baseline justify-between mb-1">
-                          <p className="font-sans text-xs font-medium text-[#16161D]">{w.name}</p>
-                          <p className="font-sans text-[10px] text-text-muted">{w.t}</p>
-                        </div>
-                        <p className="font-sans text-xs text-text-muted leading-relaxed">{w.msg}</p>
-                      </div>
+                    <div key={i} className="bg-white rounded-xl p-5 border border-gray-100">
+                      <p className="font-serif text-sm text-[#16161D]/80 italic leading-relaxed mb-3">&ldquo;{w.quote}&rdquo;</p>
+                      <p className="font-sans text-xs text-text-muted text-right">&mdash; van {w.from}</p>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gray-100 p-4">
-                  <div className="bg-white rounded-full px-4 py-2.5 text-xs font-sans text-text-muted/50">
-                    Schrijf een wens...
+                <p className="text-center font-sans text-[10px] tracking-[0.15em] uppercase text-text-muted/40 mt-6">CASA NOMADA
                   </div>
                 </div>
               </div>
@@ -741,56 +709,65 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* chat mockup */}
+              {/* floor plan mockup (sponsalia-style round tables) */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="bg-[#16161D] px-5 py-3 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-red-400" />
-                  <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                  <div className="w-2 h-2 rounded-full bg-green-400" />
-                  <span className="font-sans text-[11px] text-white/40 ml-2">AI Tafelindeling</span>
-                </div>
-                <div className="p-5 space-y-3">
-                  {[
-                    {
-                      role: "ai",
-                      msg: "Hoi! Ik ben jullie AI-assistent voor de tafelindeling. Hoeveel gasten verwachten jullie?",
-                    },
-                    {
-                      role: "user",
-                      msg: "We hebben 80 gasten: 20 familie bruid, 20 familie bruidegom en 40 vrienden.",
-                    },
-                    {
-                      role: "ai",
-                      msg: "Perfect! Zijn er gasten die liever niet samen aan tafel zitten, of juist wel bij elkaar?",
-                    },
-                    {
-                      role: "user",
-                      msg: "Mijn ouders en zijn ouders kennen elkaar nog niet goed.",
-                    },
-                    {
-                      role: "ai",
-                      msg: "Begrepen! Ik maak een indeling waarbij beide families rustig kennis kunnen maken. Even geduld...",
-                    },
-                  ].map((m, i) => (
-                    <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                      <div
-                        className={`max-w-[80%] rounded-2xl px-4 py-2.5 font-sans text-xs leading-relaxed ${
-                          m.role === "ai"
-                            ? "bg-cream border border-gray-100 text-text-muted"
-                            : "bg-brand-800 text-white"
-                        }`}
-                      >
-                        {m.msg}
+                <div className="p-8">
+                  {/* table layout visualization */}
+                  <div className="relative w-full aspect-square max-w-[400px] mx-auto">
+                    {/* Bruidspaar tafel (center top) */}
+                    <div className="absolute top-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center">
+                      <p className="font-sans text-[10px] text-text-muted mb-1">Tafel Bruidspaar</p>
+                      <div className="w-14 h-14 rounded-full bg-brand-800/10 border-2 border-brand-800 flex items-center justify-center">
+                        <Heart size={16} className="text-brand-800" />
                       </div>
                     </div>
-                  ))}
+                    {/* Tafel 1 */}
+                    <div className="absolute top-[35%] left-[15%] flex flex-col items-center">
+                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 1</p>
+                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center">
+                        <span className="font-sans text-xs text-purple-700">6/6</span>
+                      </div>
+                    </div>
+                    {/* Tafel 2 */}
+                    <div className="absolute top-[35%] right-[15%] flex flex-col items-center">
+                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 2</p>
+                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center">
+                        <span className="font-sans text-xs text-purple-700">6/6</span>
+                      </div>
+                    </div>
+                    {/* Tafel 3 */}
+                    <div className="absolute top-[62%] left-[8%] flex flex-col items-center">
+                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 3</p>
+                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center">
+                        <span className="font-sans text-xs text-purple-700">5/6</span>
+                      </div>
+                    </div>
+                    {/* Tafel 4 */}
+                    <div className="absolute top-[62%] right-[8%] flex flex-col items-center">
+                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 4</p>
+                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center">
+                        <span className="font-sans text-xs text-purple-700">6/6</span>
+                      </div>
+                    </div>
+                    {/* Kindertafel */}
+                    <div className="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center">
+                      <p className="font-sans text-[9px] text-text-muted mb-1">Kindertafel</p>
+                      <div className="w-12 h-12 rounded-lg bg-pink-50 border border-pink-200 flex items-center justify-center">
+                        <span className="font-sans text-[10px] text-pink-600">3/3</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="border-t border-gray-100 px-5 py-3 bg-cream">
-                  <p className="font-sans text-[10px] text-brand-700 mb-1">
-                    &#10024; Klaar: gasten verdeeld over 6 tafels.
-                  </p>
-                  <div className="bg-white rounded-full px-4 py-2 text-xs font-sans text-text-muted/50">
-                    Plaats iedereen, het bruidspaar in het midden, families apart
+                {/* result + input bar */}
+                <div className="border-t border-gray-100 px-6 py-4 bg-cream">
+                  <p className="font-sans text-[11px] text-brand-700 mb-2">&#10024; Klaar: gasten verdeeld over 6 tafels. Bruidspaar en kinderen aan hun eigen tafels.</p>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white rounded-full px-4 py-2.5 text-xs font-sans text-text-muted/50">
+                      Plaats iedereen, het bruidspaar in het midden, families apart
+                    </div>
+                    <div className="w-9 h-9 rounded-full bg-brand-800 flex items-center justify-center shrink-0">
+                      <ArrowRight size={14} className="text-white" />
+                    </div>
                   </div>
                 </div>
               </div>
