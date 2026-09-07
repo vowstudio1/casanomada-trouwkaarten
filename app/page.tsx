@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   Plus,
   Mail,
-  Send,
   Star,
 } from "lucide-react";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -20,24 +19,24 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const templates = [
-  { name: "Volta Celeste",         img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
-  { name: "Strawberry Matcha",     img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-a6eb8665.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
-  { name: "Tratto d'Inchiostro",   img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftratto-inchiostro-en-vetrina-48f6d0e0.jpg&w=1200&q=75", desc: "Penlijnen op papier, een enkele inkt." },
-  { name: "Toile de Jouy",         img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftoile-bleu-en-vetrina-a0fc5d6a.jpg&w=1200&q=75", desc: "Toile in vier tinten op creme papier." },
-  { name: "Idillio",               img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fidillio-en-vetrina-4806113a.jpg&w=1200&q=75", desc: "Gouden strik en zwanen, alles licht." },
-  { name: "Villa Cortina",         img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-cortina-en-vetrina-553a7717.jpg&w=1200&q=75", desc: "Het gordijn opent de zaal, kant en kristal." },
-  { name: "Romantisch Botanisch",  img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbotanico-romantico-en-vetrina-5a476f93.jpg&w=1200&q=75", desc: "Bladeren en bloemen, delicaat." },
-  { name: "Tuscany Chic",          img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftuscany-chic-en-vetrina-6c591e8d.jpg&w=1200&q=75", desc: "Warm en verfijnd, en plein air." },
-  { name: "De Geheime Tuin",       img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-segreto-en-vetrina-25ee18b2.jpg&w=1200&q=75", desc: "Rozenboog en Italiaanse tuin." },
-  { name: "Betoverd Bos",          img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fincanto-nel-bosco-en-vetrina-6c056d35.jpg&w=1200&q=75", desc: "Geschilderd bos en wilde rozen." },
-  { name: "Zomertuin",             img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-16e90ec0.jpg&w=1200&q=75", desc: "Groene tuin en roze kant." },
-  { name: "Het Zwanenmeer",        img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Flago-dei-cigni-en-vetrina-4b04abc9.jpg&w=1200&q=75", desc: "Romantisch en luchtig, zachte tinten." },
-  { name: "Riviera 70",            img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Friviera-70-en-vetrina-5a764ed8.jpg&w=1200&q=75", desc: "Zonnig en vintage, jaren 70-sfeer." },
-  { name: "Gouden Uur",            img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftipografico-moderno-en-vetrina-2c921489.jpg&w=1200&q=75", desc: "Warm avondlicht, romantisch en intiem." },
-  { name: "Italiaanse Aquarel",    img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Facquerello-italia-en-vetrina-3869b8cc.jpg&w=1200&q=75", desc: "Majolica en kust in aquarel." },
-  { name: "Minimale Couture",      img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fcouture-minimale-en-vetrina-4240eaa9.jpg&w=1200&q=75", desc: "Essentieel, ruimte en adem." },
-  { name: "Oro Antico",            img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Foro-antico-en-vetrina-22d36ceb.jpg&w=1200&q=75", desc: "Beige en oud goud, bloemrijk en elegant." },
-  { name: "Villa Aurora",          img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-aurora-en-vetrina-50b36ee0.jpg&w=1200&q=75", desc: "Terras bij zonsondergang, tijdloze luxe." },
+  { name: "Volta Celeste", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
+  { name: "Strawberry Matcha", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-a6eb8665.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
+  { name: "Tratto d'Inchiostro", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftratto-inchiostro-en-vetrina-48f6d0e0.jpg&w=1200&q=75", desc: "Penlijnen op papier, een enkele inkt." },
+  { name: "Toile de Jouy", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftoile-bleu-en-vetrina-a0fc5d6a.jpg&w=1200&q=75", desc: "Toile in vier tinten op creme papier." },
+  { name: "Idillio", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fidillio-en-vetrina-4806113a.jpg&w=1200&q=75", desc: "Gouden strik en zwanen, alles licht." },
+  { name: "Villa Cortina", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-cortina-en-vetrina-553a7717.jpg&w=1200&q=75", desc: "Het gordijn opent de zaal, kant en kristal." },
+  { name: "Romantisch Botanisch", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbotanico-romantico-en-vetrina-5a476f93.jpg&w=1200&q=75", desc: "Bladeren en bloemen, delicaat." },
+  { name: "Tuscany Chic", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftuscany-chic-en-vetrina-6c591e8d.jpg&w=1200&q=75", desc: "Warm en verfijnd, en plein air." },
+  { name: "De Geheime Tuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-segreto-en-vetrina-25ee18b2.jpg&w=1200&q=75", desc: "Rozenboog en Italiaanse tuin." },
+  { name: "Betoverd Bos", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fincanto-nel-bosco-en-vetrina-6c056d35.jpg&w=1200&q=75", desc: "Geschilderd bos en wilde rozen." },
+  { name: "Zomertuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-16e90ec0.jpg&w=1200&q=75", desc: "Groene tuin en roze kant." },
+  { name: "Het Zwanenmeer", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Flago-dei-cigni-en-vetrina-4b04abc9.jpg&w=1200&q=75", desc: "Romantisch en luchtig, zachte tinten." },
+  { name: "Riviera 70", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Friviera-70-en-vetrina-5a764ed8.jpg&w=1200&q=75", desc: "Zonnig en vintage, jaren 70-sfeer." },
+  { name: "Gouden Uur", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftipografico-moderno-en-vetrina-2c921489.jpg&w=1200&q=75", desc: "Warm avondlicht, romantisch en intiem." },
+  { name: "Italiaanse Aquarel", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Facquerello-italia-en-vetrina-3869b8cc.jpg&w=1200&q=75", desc: "Majolica en kust in aquarel." },
+  { name: "Minimale Couture", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fcouture-minimale-en-vetrina-4240eaa9.jpg&w=1200&q=75", desc: "Essentieel, ruimte en adem." },
+  { name: "Oro Antico", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Foro-antico-en-vetrina-22d36ceb.jpg&w=1200&q=75", desc: "Beige en oud goud, bloemrijk en elegant." },
+  { name: "Villa Aurora", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-aurora-en-vetrina-50b36ee0.jpg&w=1200&q=75", desc: "Terras bij zonsondergang, tijdloze luxe." },
 ];
 
 const templateNames = [
@@ -46,17 +45,17 @@ const templateNames = [
 ];
 
 const steps = [
-  { n: "01", title: "Kies je stijl",       desc: "Begin met het zorgvuldig vormgegeven sjabloon dat het best bij jullie past. Elk sjabloon is geoptimaliseerd voor de smartphone." },
-  { n: "02", title: "Personaliseer",        desc: "Voeg namen, datum, programma en details toe, plus jullie eigen foto en lied. Een gratis livevoorbeeld voordat je betaalt." },
-  { n: "03", title: "Deel",                 desc: "Publiceer met een klik en deel de persoonlijke link van elke gast via WhatsApp, Instagram of waar je maar wilt." },
+  { n: "01", title: "Kies je stijl", desc: "Begin met het zorgvuldig vormgegeven sjabloon dat het best bij jullie past. Elk sjabloon is geoptimaliseerd voor de smartphone." },
+  { n: "02", title: "Personaliseer", desc: "Voeg namen, datum, programma en details toe, plus jullie eigen foto en lied. Een gratis livevoorbeeld voordat je betaalt." },
+  { n: "03", title: "Deel", desc: "Publiceer met een klik en deel de persoonlijke link van elke gast via WhatsApp, Instagram of waar je maar wilt." },
   { n: "04", title: "Alle antwoorden op een plek", desc: "Aanwezigheid, dieetwensen en menukeuzes werken zichzelf bij in je dashboard terwijl je gasten antwoorden." },
 ];
 
 const plans = [
   {
-    name:     "Collectie",
-    price:    "89",
-    desc:     "eenmalige betaling",
+    name: "Collectie",
+    price: "89",
+    desc: "eenmalige betaling",
     features: [
       "Kleuren, lettertypes en jullie foto: alles aanpasbaar",
       "Een persoonlijke link per groep",
@@ -66,26 +65,26 @@ const plans = [
       "Afgewerkte uitnodiging voor de betaling",
       "Muziek: onze selectie of jullie eigen nummer",
     ],
-    cta:      "Maak je uitnodiging — gratis",
+    cta: "Maak je uitnodiging — gratis",
     highlight: true,
   },
   {
-    name:     "Destination Wedding",
-    price:    "149",
-    desc:     "eenmalige betaling",
+    name: "Destination Wedding",
+    price: "149",
+    desc: "eenmalige betaling",
     features: [
       "Alles uit de Collectie",
       "Onbeperkt dagen: welkomstdiner, bruiloft, brunch",
       "Per dag andere gasten",
       "'Waar te slapen': hotels met foto's en boekingslink",
     ],
-    cta:      "Maak je uitnodiging — gratis",
+    cta: "Maak je uitnodiging — gratis",
     highlight: false,
   },
   {
-    name:     "Op maat",
-    price:    "249",
-    desc:     "eenmalige betaling",
+    name: "Op maat",
+    price: "249",
+    desc: "eenmalige betaling",
     features: [
       "Alles uit de Collectie",
       "Een ontwerp speciaal voor jullie gemaakt",
@@ -93,22 +92,118 @@ const plans = [
       "Meteen publiceren terwijl we ontwerpen",
       "Persoonlijke begeleiding van briefing tot oplevering",
     ],
-    cta:      "Maak je uitnodiging — gratis",
+    cta: "Maak je uitnodiging — gratis",
     highlight: false,
   },
 ];
 
 const comparisonRows = [
-  { feature: "Alle sjablonen, kleuren en lettertypes", c: true,  d: true,  m: true  },
-  { feature: "Elke gast in zijn eigen taal",           c: true,  d: true,  m: true  },
-  { feature: "Antwoorden van gasten in realtime",      c: true,  d: true,  m: true  },
-  { feature: "AI-tekstpersonalisatie",                  c: true,  d: true,  m: true  },
-  { feature: "Gastenboek met wensen",                   c: true,  d: true,  m: true  },
-  { feature: "Onbeperkt dagen en momenten",             c: false, d: true,  m: true  },
-  { feature: "Hotels met foto en boekingslink",         c: false, d: true,  m: true  },
-  { feature: "AI-tafelindeling",                        c: false, d: true,  m: true  },
-  { feature: "Een ontwerp speciaal voor jullie",        c: false, d: false, m: true  },
+  { feature: "Alle sjablonen, kleuren en lettertypes", c: true, d: true, m: true },
+  { feature: "Elke gast in zijn eigen taal", c: true, d: true, m: true },
+  { feature: "Antwoorden van gasten in realtime", c: true, d: true, m: true },
+  { feature: "AI-tekstpersonalisatie", c: true, d: true, m: true },
+  { feature: "Gastenboek met wensen", c: true, d: true, m: true },
+  { feature: "Onbeperkt dagen en momenten", c: false, d: true, m: true },
+  { feature: "Hotels met foto en boekingslink", c: false, d: true, m: true },
+  { feature: "AI-tafelindeling", c: false, d: true, m: true },
+  { feature: "Een ontwerp speciaal voor jullie", c: false, d: false, m: true },
 ];
+
+const voordelenLarge = [
+  {
+    n: "01",
+    iconType: "heart" as const,
+    title: "Een uitnodiging die alleen van jullie is",
+    desc: "Verfijnde typografie, smaakvolle kleurenpaletten, jullie eigen foto en jullie eigen lied: elk detail zegt “dit is onze dag”, geen standaardsjabloon. Een uitnodiging met karakter die jullie met trots delen.",
+    dark: true,
+  },
+  {
+    n: "02",
+    iconType: "mail" as const,
+    title: "Een uitnodiging op maat voor elke gast",
+    desc: "Elke groep krijgt een eigen uitnodiging, met de namen er al in en een persoonlijke link. Stuur ze een voor een, of deel een open link en laat gasten zich zelf aanmelden. Hoe dan ook voelt iedereen zich deel van jullie dag.",
+    dark: false,
+  },
+  {
+    n: "03",
+    iconType: "check" as const,
+    title: "Alle antwoorden in een lijst",
+    desc: "Aanwezigheid, intoleranties, menukeuzes en kinderen werken zichzelf bij terwijl je gasten antwoorden. Geen bevestigingen meer verspreid over berichten en telefoontjes: alles staat in een lijst, altijd actueel en klaar voor de cateraar.",
+    dark: false,
+  },
+];
+
+const voordelenSmall = [
+  { iconType: "check" as const, title: "Elke gast in zijn eigen taal", desc: "Elke uitnodiging past zich automatisch aan de taal van wie hem opent." },
+  { iconType: "heart" as const, title: "100% digitaal en milieuvriendelijk", desc: "Geen papier, geen drukwerk, geen verzending." },
+  { iconType: "arrow" as const, title: "Klaar in enkele minuten", desc: "Kies een sjabloon, vul jullie gegevens in, publiceer met een klik." },
+  { iconType: "mail" as const, title: "Envelop met lakzegel die opent bij aanraking", desc: "Elke uitnodiging komt in een envelop met lakzegel die met een aanraking opent." },
+  { iconType: "star" as const, title: "Tafels geregeld met AI", desc: "Typ of praat en de assistent plaatst alle gasten in 2 minuten." },
+];
+
+const gastenboekQuotes = [
+  {
+    quote: "Ik kijk naar jullie vandaag en zie het licht in jullie ogen. Het leven vliegt voorbij, mijn lievelingen: houd elkaars hand vast, ook als je elkaar niet begrijpt. Ik zal er altijd voor jullie zijn. Ik houd meer van jullie dan woorden kunnen zeggen.",
+    from: "Oma Elena",
+  },
+  {
+    quote: "We hebben je leren lopen door je handje vast te houden, en vandaag leg je die hand in de zijne. Je zult altijd ons kleine meisje blijven. We zijn zo trots op jullie beiden. Veel geluk met alle avonturen.",
+    from: "Mama & Papa",
+  },
+  {
+    quote: "We hebben genoeg wilde avonden gehad samen, maar jullie liefde zien groeien is het mooiste van alles. We wensen jullie een leven vol lachen, reizen en dat prachtige warrige geluk. We houden van jullie!",
+    from: "Lisa & Mark",
+  },
+];
+
+const tafelFeatures = [
+  {
+    title: "Jij praat, hij plaatst",
+    desc: "Dicteer een opdracht of typ hem: “plaats iedereen, het bruidspaar in het midden, families apart”. Klaar.",
+  },
+  {
+    title: "Hij snapt de echte voorwaarden",
+    desc: "Familie die uit elkaar moet, exen, kinderen samen: zeg het gewoon in woorden, hij regelt het.",
+  },
+  {
+    title: "Tafelnamen met een thema",
+    desc: "Italiaanse steden, films, reizen: de AI stelt themanamen voor die bij jullie stijl passen.",
+  },
+  {
+    title: "Jij beslist altijd",
+    desc: "De AI stelt voor, jij beslist: versleep met de hand, exporteer de dieet-PDF voor de keuken.",
+  },
+];
+
+function SmallIcon({ iconType, className }: { iconType: string; className?: string }) {
+  switch (iconType) {
+    case "heart":
+      return <Heart size={18} className={className} />;
+    case "check":
+      return <Check size={18} className={className} />;
+    case "arrow":
+      return <ArrowRight size={18} className={className} />;
+    case "mail":
+      return <Mail size={18} className={className} />;
+    case "star":
+      return <Star size={18} className={className} />;
+    default:
+      return <Check size={18} className={className} />;
+  }
+}
+
+function LargeIcon({ iconType, size, className }: { iconType: string; size: number; className?: string }) {
+  switch (iconType) {
+    case "heart":
+      return <Heart size={size} className={className} />;
+    case "mail":
+      return <Mail size={size} className={className} />;
+    case "check":
+      return <Check size={size} className={className} />;
+    default:
+      return <Check size={size} className={className} />;
+  }
+}
 
 export default function HomePage() {
   return (
@@ -156,7 +251,7 @@ export default function HomePage() {
       <main className="pt-16">
 
         {/* ══════════════════════════════════════════════════
-            HERO — SPLIT LAYOUT (left text, right phone)
+            HERO
         ══════════════════════════════════════════════════ */}
         <section className="bg-white">
           <div className="max-w-7xl mx-auto px-6 py-28">
@@ -180,7 +275,7 @@ export default function HomePage() {
 
                 {/* H2 */}
                 <h2 className="font-serif text-[1.45rem] font-medium text-[#16161D]/70 mb-6">
-                  Digitale trouwkaarten — elegant, persoonlijk, moeiteloos
+                  Digitale trouwkaarten &mdash; elegant, persoonlijk, moeiteloos
                 </h2>
 
                 {/* feature pills */}
@@ -362,48 +457,68 @@ export default function HomePage() {
               </h2>
             </div>
 
-            {/* 3 large feature cards (sponsalia-style: first burgundy, rest white) */}
-            <div className=”grid md:grid-cols-3 gap-6 mb-12”>
-              {[
-                { n: “01”, icon: “Heart”, title: “Een uitnodiging die alleen van jullie is”, desc: “Verfijnde typografie, smaakvolle kleurenpaletten, jullie eigen foto en jullie eigen lied: elk detail zegt „dit is onze dag”, geen standaardsjabloon. Een uitnodiging met karakter die jullie met trots delen.”, dark: true },
-                { n: “02”, icon: “Users”, title: “Een uitnodiging op maat voor elke gast”, desc: “Elke groep krijgt een eigen uitnodiging, met de namen er al in en een persoonlijke link. Stuur ze een voor een, of deel een open link en laat gasten zich zelf aanmelden. Hoe dan ook voelt iedereen zich deel van jullie dag.”, dark: false },
-                { n: “03”, icon: “Check”, title: “Alle antwoorden in een lijst”, desc: “Aanwezigheid, intoleranties, menukeuzes en kinderen werken zichzelf bij terwijl je gasten antwoorden. Geen bevestigingen meer verspreid over berichten en telefoontjes: alles staat in een lijst, altijd actueel en klaar voor de cateraar.”, dark: false },
-              ].map((item, i) => (
-                <div key={i} className={`rounded-2xl p-8 flex flex-col ${item.dark ? “bg-brand-800” : “bg-white border border-gray-200”}`}>
-                  <div className=”flex items-start justify-between mb-6”>
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.dark ? “bg-white/15” : “bg-cream”}`}>
-                      {item.icon === “Heart” && <Heart size={20} className={item.dark ? “text-white” : “text-brand-800”} />}
-                      {item.icon === “Users” && <Mail size={20} className=”text-brand-800” />}
-                      {item.icon === “Check” && <Check size={20} className=”text-brand-800” />}
+            {/* 3 large feature cards */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              {voordelenLarge.map((item, i) => (
+                <div
+                  key={i}
+                  className={
+                    "rounded-2xl p-8 flex flex-col " +
+                    (item.dark ? "bg-brand-800" : "bg-white border border-gray-200")
+                  }
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div
+                      className={
+                        "w-12 h-12 rounded-full flex items-center justify-center " +
+                        (item.dark ? "bg-white/15" : "bg-cream")
+                      }
+                    >
+                      <LargeIcon
+                        iconType={item.iconType}
+                        size={20}
+                        className={item.dark ? "text-white" : "text-brand-800"}
+                      />
                     </div>
-                    <span className={`font-serif text-[2.5rem] leading-none ${item.dark ? “text-white/20” : “text-gray-200”}`}>{item.n}</span>
+                    <span
+                      className={
+                        "font-serif text-[2.5rem] leading-none " +
+                        (item.dark ? "text-white/20" : "text-gray-200")
+                      }
+                    >
+                      {item.n}
+                    </span>
                   </div>
-                  <h3 className={`font-serif text-[1.25rem] font-semibold mb-3 ${item.dark ? “text-white” : “text-[#16161D]”}`}>{item.title}</h3>
-                  <p className={`font-sans text-[14px] leading-relaxed ${item.dark ? “text-white/75” : “text-text-muted”}`}>{item.desc}</p>
+                  <h3
+                    className={
+                      "font-serif text-[1.25rem] font-semibold mb-3 " +
+                      (item.dark ? "text-white" : "text-[#16161D]")
+                    }
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className={
+                      "font-sans text-[14px] leading-relaxed " +
+                      (item.dark ? "text-white/75" : "text-text-muted")
+                    }
+                  >
+                    {item.desc}
+                  </p>
                 </div>
               ))}
             </div>
 
             {/* smaller feature cards with icons */}
-            <div className=”grid sm:grid-cols-2 lg:grid-cols-3 gap-5”>
-              {[
-                { icon: “Globe”, title: “Elke gast in zijn eigen taal”, desc: “Elke uitnodiging past zich automatisch aan de taal van wie hem opent.” },
-                { icon: “Leaf”, title: “100% digitaal en milieuvriendelijk”, desc: “Geen papier, geen drukwerk, geen verzending.” },
-                { icon: “Clock”, title: “Klaar in enkele minuten”, desc: “Kies een sjabloon, vul jullie gegevens in, publiceer met een klik.” },
-                { icon: “Mail”, title: “Envelop met lakzegel die opent bij aanraking”, desc: “Elke uitnodiging komt in een envelop met lakzegel die met een aanraking opent.” },
-                { icon: “Sparkles”, title: “Tafels geregeld met AI”, desc: “Typ of praat en de assistent plaatst alle gasten in 2 minuten.” },
-              ].map((f, i) => (
-                <div key={i} className=”bg-white rounded-2xl p-6 border border-gray-100 flex gap-4”>
-                  <div className=”w-10 h-10 rounded-full bg-cream shrink-0 flex items-center justify-center”>
-                    {f.icon === “Globe” && <Check size={18} className=”text-brand-800” />}
-                    {f.icon === “Leaf” && <Heart size={18} className=”text-brand-800” />}
-                    {f.icon === “Clock” && <ArrowRight size={18} className=”text-brand-800” />}
-                    {f.icon === “Mail” && <Mail size={18} className=”text-brand-800” />}
-                    {f.icon === “Sparkles” && <Star size={18} className=”text-brand-800” />}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {voordelenSmall.map((f, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-cream shrink-0 flex items-center justify-center">
+                    <SmallIcon iconType={f.iconType} className="text-brand-800" />
                   </div>
                   <div>
-                    <h4 className=”font-serif text-[15px] font-semibold text-[#16161D] mb-1”>{f.title}</h4>
-                    <p className=”font-sans text-xs text-text-muted leading-relaxed”>{f.desc}</p>
+                    <h4 className="font-serif text-[15px] font-semibold text-[#16161D] mb-1">{f.title}</h4>
+                    <p className="font-sans text-xs text-text-muted leading-relaxed">{f.desc}</p>
                   </div>
                 </div>
               ))}
@@ -584,7 +699,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* PDF-style gastenboek mockup (like sponsalia "Thoughts for the couple") */}
+              {/* PDF-style gastenboek mockup */}
               <div className="bg-cream rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10">
                 <div className="text-center mb-8">
                   <h3 className="font-serif text-2xl text-brand-800 italic mb-1">Gedachten voor het bruidspaar</h3>
@@ -593,14 +708,14 @@ export default function HomePage() {
                   <div className="w-12 border-t border-brand-800/20 mx-auto mt-4" />
                 </div>
                 <div className="space-y-6">
-                  {[
-                    { quote: "Ik kijk naar jullie vandaag en zie het licht in jullie ogen. Het leven vliegt voorbij, mijn lievelingen: houd elkaars hand vast, ook als je elkaar niet begrijpt. Ik zal er altijd voor jullie zijn. Ik houd meer van jullie dan woorden kunnen zeggen.", from: "Oma Elena" },
-                    { quote: "We hebben je leren lopen door je handje vast te houden, en vandaag leg je die hand in de zijne. Je zult altijd ons kleine meisje blijven. We zijn zo trots op jullie beiden. Veel geluk met alle avonturen.", from: "Mama &amp; Papa" },
-                    { quote: "We hebben genoeg wilde avonden gehad samen, maar jullie liefde zien groeien is het mooiste van alles. We wensen jullie een leven vol lachen, reizen en dat prachtige warrige geluk. We houden van jullie!", from: "Lisa &amp; Mark" },
-                  ].map((w, i) => (
+                  {gastenboekQuotes.map((w, i) => (
                     <div key={i} className="bg-white rounded-xl p-5 border border-gray-100">
-                      <p className="font-serif text-sm text-[#16161D]/80 italic leading-relaxed mb-3">&ldquo;{w.quote}&rdquo;</p>
-                      <p className="font-sans text-xs text-text-muted text-right">&mdash; van {w.from}</p>
+                      <p className="font-serif text-sm text-[#16161D]/80 italic leading-relaxed mb-3">
+                        &ldquo;{w.quote}&rdquo;
+                      </p>
+                      <p className="font-sans text-xs text-text-muted text-right">
+                        &mdash; van {w.from}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -629,24 +744,7 @@ export default function HomePage() {
                 </p>
 
                 <div className="space-y-8">
-                  {[
-                    {
-                      title: "Jij praat, hij plaatst",
-                      desc: "Dicteer een opdracht of typ hem: “plaats iedereen, het bruidspaar in het midden, families apart”. Klaar.",
-                    },
-                    {
-                      title: "Hij snapt de echte voorwaarden",
-                      desc: "Familie die uit elkaar moet, exen, kinderen samen: zeg het gewoon in woorden, hij regelt het.",
-                    },
-                    {
-                      title: "Tafelnamen met een thema",
-                      desc: "Italiaanse steden, films, reizen: de AI stelt themanamen voor die bij jullie stijl passen.",
-                    },
-                    {
-                      title: "Jij beslist altijd",
-                      desc: "De AI stelt voor, jij beslist: versleep met de hand, exporteer de dieet-PDF voor de keuken.",
-                    },
-                  ].map((f, i) => (
+                  {tafelFeatures.map((f, i) => (
                     <div key={i}>
                       <h4 className="font-serif text-lg text-[#16161D] mb-1.5">{f.title}</h4>
                       <p className="font-sans text-sm text-text-muted leading-relaxed">{f.desc}</p>
@@ -667,7 +765,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* floor plan mockup (sponsalia-style round tables) */}
+              {/* floor plan mockup */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="p-8">
                   {/* table layout visualization */}
@@ -718,7 +816,9 @@ export default function HomePage() {
                 </div>
                 {/* result + input bar */}
                 <div className="border-t border-gray-100 px-6 py-4 bg-cream">
-                  <p className="font-sans text-[11px] text-brand-700 mb-2">&#10024; Klaar: gasten verdeeld over 6 tafels. Bruidspaar en kinderen aan hun eigen tafels.</p>
+                  <p className="font-sans text-[11px] text-brand-700 mb-2">
+                    &#10024; Klaar: gasten verdeeld over 6 tafels. Bruidspaar en kinderen aan hun eigen tafels.
+                  </p>
                   <div className="flex gap-2">
                     <div className="flex-1 bg-white rounded-full px-4 py-2.5 text-xs font-sans text-text-muted/50">
                       Plaats iedereen, het bruidspaar in het midden, families apart
