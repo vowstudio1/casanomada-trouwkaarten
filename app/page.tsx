@@ -235,57 +235,21 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* ── RIGHT: phone mockup ── */}
+              {/* ── RIGHT: phone mockup with real image ── */}
               <div className="animate-fade-up animate-fade-up-delay-1 flex flex-col items-center">
-                {/* CSS phone frame */}
-                <div className="relative w-[280px] md:w-[300px]">
-                  <div className="rounded-[2.5rem] bg-[#16161D] p-2 shadow-2xl shadow-black/20">
+                <div className="relative w-[280px] md:w-[320px] lg:w-[360px]">
+                  {/* phone frame */}
+                  <div className="rounded-[2.5rem] bg-[#16161D] p-[6px] shadow-2xl shadow-black/25">
                     {/* notch */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[28px] bg-[#16161D] rounded-b-2xl z-10" />
-
-                    {/* screen */}
-                    <div className="rounded-[2rem] overflow-hidden bg-white">
-                      {/* card header */}
-                      <div className="bg-brand-800 px-5 pt-10 pb-6 text-center">
-                        <p className="text-[10px] tracking-[0.2em] uppercase text-white/60 font-sans mb-3">
-                          Uitnodiging
-                        </p>
-                        <p className="font-serif text-[2.5rem] text-white font-light leading-none mb-1">
-                          A &amp; B
-                        </p>
-                        <p className="font-sans text-[11px] text-white/70 tracking-wide">
-                          14 juni 2025
-                        </p>
-                      </div>
-
-                      {/* card body */}
-                      <div className="px-5 py-6 text-center">
-                        <p className="font-serif text-sm text-[#16161D] mb-1">
-                          Jullie zijn van harte uitgenodigd
-                        </p>
-                        <p className="font-sans text-[11px] text-text-muted mb-5 leading-relaxed">
-                          voor ons huwelijk in Toscane
-                        </p>
-
-                        {/* RSVP button */}
-                        <div className="bg-brand-800 rounded-full py-2.5 px-8 text-[11px] text-white font-sans tracking-[0.15em] uppercase inline-block mb-5">
-                          Bevestig aanwezigheid
-                        </div>
-
-                        {/* envelope illustration */}
-                        <div className="flex justify-center mt-2">
-                          <div className="relative w-16 h-12">
-                            <div className="absolute inset-0 bg-cream border border-gray-200 rounded-sm" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Mail size={20} className="text-brand-800/40" />
-                            </div>
-                            {/* wax seal */}
-                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-brand-800 flex items-center justify-center">
-                              <Heart size={8} className="text-white" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100px] h-[24px] bg-[#16161D] rounded-b-2xl z-10" />
+                    {/* screen with real invitation image */}
+                    <div className="rounded-[2.2rem] overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=828&q=85"
+                        alt="Volta Celeste uitnodiging voorbeeld"
+                        className="w-full h-auto block"
+                      />
                     </div>
                   </div>
                 </div>
