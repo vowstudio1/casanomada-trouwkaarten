@@ -18,25 +18,33 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Casa Nomada Digital | Digitale Trouwkaarten",
-  description:
-    "Maak prachtige digitale trouwuitnodigingen met AI-personalisatie, gastenregistratie en meer. Vanaf €89.",
-  keywords: "digitale trouwkaart, trouwuitnodiging, online uitnodiging, bruiloft",
-  openGraph: {
-    title: "Casa Nomada Digital | Digitale Trouwkaarten",
-    description: "Prachtige digitale trouwuitnodigingen met AI-personalisatie.",
-    type: "website",
-    locale: "nl_NL",
+  title: {
+    default: "Casa Nomada | Digitale Trouwkaarten",
+    template: "%s | Casa Nomada",
   },
+  description: "Maak in enkele minuten een elegante digitale trouwkaart. Gratis voorbeeld, publiceren met een klik, en elke gast krijgt de zijne in zijn eigen taal.",
+  keywords: ["digitale trouwkaarten", "trouwuitnodiging", "online uitnodiging", "bruiloft", "RSVP", "wedding invitation", "Casa Nomada"],
+  authors: [{ name: "Casa Nomada Digital" }],
+  openGraph: {
+    title: "Casa Nomada | Digitale Trouwkaarten",
+    description: "Elegante digitale trouwkaarten met AI-personalisatie, meertalige RSVP en tafelindeling.",
+    url: "https://casanomada-trouwkaarten.netlify.app",
+    siteName: "Casa Nomada",
+    locale: "nl_NL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Casa Nomada | Digitale Trouwkaarten",
+    description: "Elegante digitale trouwkaarten met AI-personalisatie.",
+  },
+  robots: { index: true, follow: true },
+  metadataBase: new URL("https://casanomada-trouwkaarten.netlify.app"),
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl" className={`${cormorant.variable} ${roboto.variable}`}>
+    <html lang="nl" className={cormorant.variable + " " + roboto.variable}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );
