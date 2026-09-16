@@ -3,7 +3,13 @@
 import React, { useState } from "react";
 import { Heart, Check, ArrowRight, Plus, Minus, Mail } from "lucide-react";
 
-export default function RSVPPage() {
+export default function RSVPPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const invitationId = params.id;
+
   const [attendance, setAttendance] = useState<"yes" | "no" | null>(null);
   const [guestCount, setGuestCount] = useState(1);
   const [guestNames, setGuestNames] = useState("");
@@ -12,7 +18,9 @@ export default function RSVPPage() {
   const [childrenCount, setChildrenCount] = useState(0);
   const [message, setMessage] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const weddingDate = "14 juni 2025";
   const coupleName = "Sophie & Thomas";
@@ -38,28 +46,49 @@ export default function RSVPPage() {
     }
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (attendance === null) {
       setValidationError("Selecteer of je aanwezig kunt zijn.");
       return;
     }
     setValidationError("");
+    setSubmitError("");
+    setIsSubmitting(true);
 
     const formData = {
-      attendance,
-      guestCount: attendance === "yes" ? guestCount : 0,
-      guestNames: attendance === "yes" ? guestNames : "",
-      dietaryNeeds: attendance === "yes" ? dietaryNeeds : [],
-      dietaryOther:
+      invitation_id: invitationId,
+      attending: attendance === "yes",
+      guest_count: attendance === "yes" ? guestCount : 0,
+      guest_names: attendance === "yes" ? guestNames : "",
+      dietary: attendance === "yes" ? dietaryNeeds : [],
+      dietary_other:
         attendance === "yes" && dietaryNeeds.includes("Anders")
           ? dietaryOther
           : "",
-      childrenCount: attendance === "yes" ? childrenCount : 0,
-      message,
+      children_count: attendance === "yes" ? childrenCount : 0,
+      message: message,
     };
 
-    console.log("RSVP Submitted:", formData);
-    setIsSubmitted(true);
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(
+          (data && data.error) || "Er ging iets mis bij het opslaan"
+        );
+      }
+      setIsSubmitted(true);
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error ? e.message : "Er ging iets mis bij het opslaan";
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   if (isSubmitted) {
@@ -352,7 +381,7 @@ export default function RSVPPage() {
           padding: "0 0 2rem",
         }}
       >
-        {/* ── Invitation Header ── */}
+        {/* Invitation Header */}
         <div
           style={{
             background: "linear-gradient(135deg, #59262F 0%, #7a3a45 100%)",
@@ -439,7 +468,7 @@ export default function RSVPPage() {
           />
         </div>
 
-        {/* ── Form Container ── */}
+        {/* Form Container */}
         <div style={{ padding: "0 1rem" }}>
           {/* Validation Error */}
           {validationError && (
@@ -459,7 +488,25 @@ export default function RSVPPage() {
             </div>
           )}
 
-          {/* ── 1. Aanwezigheid ── */}
+          {/* Submit Error */}
+          {submitError && (
+            <div
+              style={{
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "0.75rem",
+                padding: "0.75rem 1rem",
+                marginBottom: "1rem",
+                color: "#991b1b",
+                fontSize: "0.875rem",
+                textAlign: "center",
+              }}
+            >
+              {submitError}
+            </div>
+          )}
+
+          {/* 1. Aanwezigheid */}
           <div
             style={{
               background: "#FFFFFF",
@@ -480,9 +527,7 @@ export default function RSVPPage() {
             >
               Aanwezigheid
             </h2>
-            <div
-              style={{ display: "flex", gap: "0.75rem" }}
-            >
+            <div style={{ display: "flex", gap: "0.75rem" }}>
               {/* Ja button */}
               <button
                 type="button"
@@ -537,8 +582,7 @@ export default function RSVPPage() {
                   style={{
                     fontSize: "0.95rem",
                     fontWeight: attendance === "yes" ? 600 : 400,
-                    color:
-                      attendance === "yes" ? "#16a34a" : "#6b7280",
+                    color: attendance === "yes" ? "#16a34a" : "#6b7280",
                   }}
                 >
                   Ja, ik kom!
@@ -599,8 +643,7 @@ export default function RSVPPage() {
                   style={{
                     fontSize: "0.95rem",
                     fontWeight: attendance === "no" ? 600 : 400,
-                    color:
-                      attendance === "no" ? "#374151" : "#6b7280",
+                    color: attendance === "no" ? "#374151" : "#6b7280",
                   }}
                 >
                   Nee, helaas niet
@@ -609,10 +652,10 @@ export default function RSVPPage() {
             </div>
           </div>
 
-          {/* ── Conditional sections (only when "yes") ── */}
+          {/* Conditional sections (only when "yes") */}
           {attendance === "yes" && (
             <>
-              {/* ── 2. Aantal personen ── */}
+              {/* 2. Aantal personen */}
               <div
                 style={{
                   background: "#FFFFFF",
@@ -700,7 +743,7 @@ export default function RSVPPage() {
                 </div>
               </div>
 
-              {/* ── 3. Namen gasten ── */}
+              {/* 3. Namen gasten */}
               <div
                 style={{
                   background: "#FFFFFF",
@@ -756,7 +799,7 @@ export default function RSVPPage() {
                 />
               </div>
 
-              {/* ── 4. Dieetwensen ── */}
+              {/* 4. Dieetwensen */}
               <div
                 style={{
                   background: "#FFFFFF",
@@ -866,7 +909,7 @@ export default function RSVPPage() {
                 </div>
               </div>
 
-              {/* ── 5. Kinderen ── */}
+              {/* 5. Kinderen */}
               <div
                 style={{
                   background: "#FFFFFF",
@@ -969,7 +1012,7 @@ export default function RSVPPage() {
             </>
           )}
 
-          {/* ── 6. Bericht (always visible) ── */}
+          {/* 6. Bericht (always visible) */}
           <div
             style={{
               background: "#FFFFFF",
@@ -1018,10 +1061,11 @@ export default function RSVPPage() {
             />
           </div>
 
-          {/* ── 7. Submit ── */}
+          {/* 7. Submit */}
           <button
             type="button"
             onClick={handleSubmit}
+            disabled={isSubmitting}
             style={{
               width: "100%",
               padding: "1rem",
@@ -1032,17 +1076,18 @@ export default function RSVPPage() {
               color: "#FFFFFF",
               fontSize: "1rem",
               fontWeight: 600,
-              cursor: "pointer",
+              cursor: isSubmitting ? "wait" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: "0.5rem",
               transition: "all 0.2s ease",
               boxShadow: "0 4px 16px rgba(89,38,47,0.25)",
+              opacity: isSubmitting ? 0.7 : 1,
             }}
           >
-            Bevestig RSVP
-            <ArrowRight size={18} />
+            {isSubmitting ? "Bezig met opslaan..." : "Bevestig RSVP"}
+            {!isSubmitting && <ArrowRight size={18} />}
           </button>
 
           {/* Footer */}
