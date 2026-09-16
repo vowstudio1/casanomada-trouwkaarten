@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Heart } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const THEME_COLORS = [
   { value: "#59262F", label: "Burgundy" },
@@ -49,7 +50,8 @@ export default function EditorPage({
 }: {
   params: { slug: string };
 }) {
-  const templateName = templateNameFromSlug(params.slug);
+  const slug = params.slug;
+  const templateName = templateNameFromSlug(slug);
 
   const [partner1, setPartner1] = useState("");
   const [partner2, setPartner2] = useState("");
@@ -60,7 +62,61 @@ export default function EditorPage({
   const [dresscode, setDresscode] = useState("Geen voorkeur");
   const [tijd, setTijd] = useState("");
   const [themeColor, setThemeColor] = useState("#59262F");
-  const [showTooltip, setShowTooltip] = useState(false);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function checkAuth() {
+      const { data } = await supabase.auth.getUser();
+      setIsLoggedIn(!!data.user);
+      setAuthChecked(true);
+    }
+    checkAuth();
+  }, []);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError("Je moet ingelogd zijn om op te slaan");
+        return;
+      }
+
+      const res = await fetch("/api/invitations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + session.access_token,
+        },
+        body: JSON.stringify({
+          template_slug: slug,
+          partner1_name: partner1,
+          partner2_name: partner2,
+          wedding_date: datum,
+          location_name: locatieNaam,
+          location_city: stad,
+          message: bericht,
+          dresscode: dresscode,
+          wedding_time: tijd,
+          theme_color: themeColor,
+        }),
+      });
+      if (!res.ok) throw new Error("Opslaan mislukt");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Er ging iets mis";
+      setError(msg);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const displayNames =
     partner1 || partner2
@@ -107,38 +163,95 @@ export default function EditorPage({
             </span>
           </div>
 
-          <div className="relative">
-            <button
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-              className="px-5 py-2 rounded-xl text-sm font-medium transition-opacity cursor-not-allowed opacity-50"
-              style={{
-                backgroundColor: "#59262F",
-                color: "#FAFAF8",
-              }}
-              disabled
-            >
-              Opslaan
-            </button>
-            {showTooltip && (
+          <div className="flex items-center gap-3">
+            {/* Success toast */}
+            {saved && (
               <div
-                className="absolute top-full right-0 mt-2 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap shadow-lg"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm"
                 style={{
-                  backgroundColor: "#16161D",
+                  backgroundColor: "#065f46",
                   color: "#FAFAF8",
                 }}
               >
-                Binnenkort beschikbaar
+                <Check className="w-4 h-4" />
+                Uitnodiging opgeslagen!
               </div>
+            )}
+
+            {/* Error message */}
+            {error && (
+              <div
+                className="px-3 py-1.5 rounded-lg text-sm"
+                style={{
+                  backgroundColor: "#fef2f2",
+                  color: "#991b1b",
+                  border: "1px solid #fecaca",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Save button */}
+            {authChecked && isLoggedIn ? (
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-5 py-2 rounded-xl text-sm font-medium transition-opacity"
+                style={{
+                  backgroundColor: "#59262F",
+                  color: "#FAFAF8",
+                  opacity: isSaving ? 0.6 : 1,
+                  cursor: isSaving ? "wait" : "pointer",
+                }}
+              >
+                {isSaving ? "Opslaan..." : "Opslaan"}
+              </button>
+            ) : (
+              <button
+                className="px-5 py-2 rounded-xl text-sm font-medium opacity-50 cursor-not-allowed"
+                style={{
+                  backgroundColor: "#59262F",
+                  color: "#FAFAF8",
+                }}
+                disabled
+              >
+                Opslaan
+              </button>
             )}
           </div>
         </div>
       </header>
 
+      {/* Auth banner */}
+      {authChecked && !isLoggedIn && (
+        <div
+          className="fixed top-16 left-0 right-0 z-40 px-4 py-2.5 text-center text-sm"
+          style={{
+            backgroundColor: "#fef3c7",
+            color: "#92400e",
+            borderBottom: "1px solid #fde68a",
+          }}
+        >
+          Log in om je uitnodiging op te slaan.{" "}
+          <Link
+            href="/login"
+            className="underline font-medium"
+            style={{ color: "#59262F" }}
+          >
+            Inloggen
+          </Link>
+        </div>
+      )}
+
       {/* Main content */}
-      <main className="pt-16">
+      <main
+        style={{
+          paddingTop: authChecked && !isLoggedIn ? "6.5rem" : "4rem",
+        }}
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
-          {/* LEFT — Form */}
+          {/* LEFT -- Form */}
           <div
             className="p-6 sm:p-8 lg:p-12 overflow-y-auto"
             style={{ borderRight: "1px solid #e5e5e5" }}
@@ -497,7 +610,7 @@ export default function EditorPage({
             </div>
           </div>
 
-          {/* RIGHT — Live Preview */}
+          {/* RIGHT -- Live Preview */}
           <div
             className="p-6 sm:p-8 lg:p-12 flex items-start lg:items-center justify-center"
             style={{ backgroundColor: "#f5f5f0" }}
