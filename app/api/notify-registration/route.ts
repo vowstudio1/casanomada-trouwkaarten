@@ -5,7 +5,17 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey) {
+      console.error("Notify error: RESEND_API_KEY is not configured");
+      return NextResponse.json(
+        { error: "Emailservice is niet geconfigureerd" },
+        { status: 503 },
+      );
+    }
+
+    const resend = new Resend(apiKey);
     const { name, email } = await request.json();
 
     if (!name || !email) {
