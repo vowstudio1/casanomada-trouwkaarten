@@ -51,6 +51,17 @@ export default function RegisterPage() {
       return;
     }
 
+    // Stuur notificatie-email naar Casa Nomada
+    try {
+      await fetch("/api/notify-registration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email }),
+      });
+    } catch {
+      // Melding mislukt, maar registratie is gelukt — niet blokkeren
+    }
+
     setLoading(false);
     setSuccess(true);
   }
@@ -63,7 +74,6 @@ export default function RegisterPage() {
         color: "#16161D",
       }}
     >
-      {/* Header */}
       <header
         style={{
           padding: "1.5rem 2rem",
@@ -103,7 +113,6 @@ export default function RegisterPage() {
         <div style={{ width: "4rem" }} />
       </header>
 
-      {/* Register Form */}
       <main
         style={{
           maxWidth: "28rem",
@@ -123,12 +132,7 @@ export default function RegisterPage() {
           >
             Account aanmaken
           </h1>
-          <p
-            style={{
-              color: "#6B6B76",
-              fontSize: "0.9375rem",
-            }}
-          >
+          <p style={{ color: "#6B6B76", fontSize: "0.9375rem" }}>
             Begin met het plannen van je perfecte bruiloft
           </p>
         </div>
@@ -176,8 +180,8 @@ export default function RegisterPage() {
                 lineHeight: 1.6,
               }}
             >
-              Controleer je e-mail om je account te bevestigen.
-              Daarna kun je direct inloggen.
+              Controleer je e-mail om je account te bevestigen. Daarna kun je
+              direct inloggen.
             </p>
             <Link
               href="/login"
@@ -217,172 +221,46 @@ export default function RegisterPage() {
             )}
 
             <div style={{ marginBottom: "1.25rem" }}>
-              <label
-                htmlFor="name"
-                style={{
-                  display: "block",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  color: "#16161D",
-                  marginBottom: "0.375rem",
-                }}
-              >
+              <label htmlFor="name" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem" }}>
                 Volledige naam
               </label>
-              <input
-                id="name"
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Je volledige naam"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "0.5rem",
-                  fontSize: "0.9375rem",
-                  backgroundColor: "#FFFFFF",
-                  color: "#16161D",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+              <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Je volledige naam"
+                style={{ width: "100%", padding: "0.75rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "0.9375rem", backgroundColor: "#FFFFFF", color: "#16161D", outline: "none", boxSizing: "border-box" }}
               />
             </div>
 
             <div style={{ marginBottom: "1.25rem" }}>
-              <label
-                htmlFor="email"
-                style={{
-                  display: "block",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  color: "#16161D",
-                  marginBottom: "0.375rem",
-                }}
-              >
+              <label htmlFor="email" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem" }}>
                 E-mailadres
               </label>
               <div style={{ position: "relative" }}>
-                <Mail
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    left: "0.75rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#9CA3AF",
-                  }}
-                />
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jouw@email.nl"
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem 0.75rem 0.75rem 2.5rem",
-                    border: "1px solid #D1D5DB",
-                    borderRadius: "0.5rem",
-                    fontSize: "0.9375rem",
-                    backgroundColor: "#FFFFFF",
-                    color: "#16161D",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
+                <Mail size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }} />
+                <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jouw@email.nl"
+                  style={{ width: "100%", padding: "0.75rem 0.75rem 0.75rem 2.5rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "0.9375rem", backgroundColor: "#FFFFFF", color: "#16161D", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
             </div>
 
             <div style={{ marginBottom: "1.25rem" }}>
-              <label
-                htmlFor="password"
-                style={{
-                  display: "block",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  color: "#16161D",
-                  marginBottom: "0.375rem",
-                }}
-              >
+              <label htmlFor="password" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem" }}>
                 Wachtwoord
               </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimaal 6 tekens"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "0.5rem",
-                  fontSize: "0.9375rem",
-                  backgroundColor: "#FFFFFF",
-                  color: "#16161D",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+              <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimaal 6 tekens"
+                style={{ width: "100%", padding: "0.75rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "0.9375rem", backgroundColor: "#FFFFFF", color: "#16161D", outline: "none", boxSizing: "border-box" }}
               />
             </div>
 
             <div style={{ marginBottom: "1.75rem" }}>
-              <label
-                htmlFor="confirmPassword"
-                style={{
-                  display: "block",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  color: "#16161D",
-                  marginBottom: "0.375rem",
-                }}
-              >
+              <label htmlFor="confirmPassword" style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem" }}>
                 Wachtwoord bevestigen
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Herhaal je wachtwoord"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "0.5rem",
-                  fontSize: "0.9375rem",
-                  backgroundColor: "#FFFFFF",
-                  color: "#16161D",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+              <input id="confirmPassword" type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Herhaal je wachtwoord"
+                style={{ width: "100%", padding: "0.75rem", border: "1px solid #D1D5DB", borderRadius: "0.5rem", fontSize: "0.9375rem", backgroundColor: "#FFFFFF", color: "#16161D", outline: "none", boxSizing: "border-box" }}
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                padding: "0.75rem",
-                backgroundColor: loading ? "#8B5A63" : "#59262F",
-                color: "#FFFFFF",
-                border: "none",
-                borderRadius: "0.5rem",
-                fontSize: "0.9375rem",
-                fontWeight: 500,
-                cursor: loading ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-                transition: "background-color 0.2s",
-              }}
+            <button type="submit" disabled={loading}
+              style={{ width: "100%", padding: "0.75rem", backgroundColor: loading ? "#8B5A63" : "#59262F", color: "#FFFFFF", border: "none", borderRadius: "0.5rem", fontSize: "0.9375rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", transition: "background-color 0.2s" }}
             >
               {loading ? "Account aanmaken..." : "Registreren"}
               {!loading && <ArrowRight size={16} />}
@@ -391,23 +269,9 @@ export default function RegisterPage() {
         )}
 
         {!success && (
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: "1.5rem",
-              fontSize: "0.875rem",
-              color: "#6B6B76",
-            }}
-          >
+          <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.875rem", color: "#6B6B76" }}>
             Al een account?{" "}
-            <Link
-              href="/login"
-              style={{
-                color: "#59262F",
-                textDecoration: "underline",
-                fontWeight: 500,
-              }}
-            >
+            <Link href="/login" style={{ color: "#59262F", textDecoration: "underline", fontWeight: 500 }}>
               Inloggen
             </Link>
           </p>
