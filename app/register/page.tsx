@@ -58,7 +58,7 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), email }),
       });
-    } catch {
+    } catch (e) {
       // Melding mislukt, maar registratie is gelukt — niet blokkeren
     }
 
