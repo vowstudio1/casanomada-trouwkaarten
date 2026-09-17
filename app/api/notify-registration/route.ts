@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     });
 
     await resend.emails.send({
-      from: "Casa Nomada Trouwkaarten <onboarding@resend.dev>",
+      from: "Casa Nomada Trouwkaarten <noreply@casanomadadigital.com>",
       to: "casanomada.digital@gmail.com",
       subject: `Nieuwe aanmelding: ${name}`,
       html: `
