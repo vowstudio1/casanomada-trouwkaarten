@@ -223,9 +223,10 @@ export default function HomePage() {
                 <p className="text-[13.6px] text-[#16161D]/[0.66] font-sans mb-2">Gratis voorbeeld &middot; Veilige betaling &middot; &euro;89 om te publiceren</p>
                 <p className="text-[13px] text-[#16161D]/60 font-sans">Heb je al een account?{" "}<Link href="/dashboard" className="text-brand-700 underline underline-offset-2 hover:text-brand-800 transition-colors">Inloggen</Link></p>
               </div>
-     <div className="animate-fade-up animate-fade-up-delay-1">
+              <div className="animate-fade-up animate-fade-up-delay-1">
                 <HeroPhone />
               </div>
+            </div>
           </div>
         </section>
 
