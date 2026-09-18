@@ -17,7 +17,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   </p>
 );
 
-
+const templates = [
   const templates = [
   { name: "Bloom", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbloom-en-vetrina-96e6b193.jpg&w=1200&q=75", desc: "Coquette aquarel: linten, strikken en rozen rond een ovale cartouche." },
   { name: "Volta Celeste", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
@@ -38,7 +38,6 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   { name: "Romantisch Botanisch", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbotanico-romantico-en-vetrina-5a476f93.jpg&w=1200&q=75", desc: "Bladeren en bloemen, delicaat." },
   { name: "Strawberry Matcha", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-4c490953.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
   { name: "Toile de Jouy", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftoile-bleu-en-vetrina-a0fc5d6a.jpg&w=1200&q=75", desc: "Toile in vier tinten op crème papier, zilveren of wit lint." },
-];
 ];
 
 const templateNames = [
