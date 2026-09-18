@@ -10,6 +10,7 @@ import {
   Camera,
 } from "lucide-react";
 import FAQAccordion from "@/components/FAQAccordion";
+import HeroPhone from "@/components/HeroPhone";
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="text-[12px] tracking-[1.68px] uppercase text-brand-800 mb-5 font-sans font-semibold">
@@ -222,24 +223,9 @@ export default function HomePage() {
                 <p className="text-[13.6px] text-[#16161D]/[0.66] font-sans mb-2">Gratis voorbeeld &middot; Veilige betaling &middot; &euro;89 om te publiceren</p>
                 <p className="text-[13px] text-[#16161D]/60 font-sans">Heb je al een account?{" "}<Link href="/dashboard" className="text-brand-700 underline underline-offset-2 hover:text-brand-800 transition-colors">Inloggen</Link></p>
               </div>
-              <div className="animate-fade-up animate-fade-up-delay-1 flex flex-col items-center">
-                <div className="relative w-[200px] md:w-[220px] lg:w-[240px]">
-                  <div className="rounded-[2.2rem] bg-[#16161D] p-[5px] shadow-2xl shadow-black/25">
-                    <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[22px] bg-[#16161D] rounded-full z-10" />
-                    <div className="rounded-[1.9rem] overflow-hidden" style={{ aspectRatio: "9/19.5" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="https://sponsalia.app/assets/marketing/templates/bloom-en-vetrina-96e6b193.jpg" alt="Bloom uitnodiging voorbeeld" className="w-full h-full object-cover object-top" width={240} height={520} style={{ backgroundColor: "#e8e4df" }} />
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-6 flex flex-wrap justify-center gap-x-3 gap-y-1 max-w-[320px]">
-                  {templateNames.slice(0, 8).map((name, i) => (
-                    <span key={i} className="font-sans text-[12px] text-text-muted/60 hover:text-brand-800 cursor-pointer transition-colors">{name}{i < 7 ? "," : ""}</span>
-                  ))}
-                </div>
-                <p className="font-sans text-[11px] text-text-muted/50 mt-2">Livevoorbeeld &middot; tik op een sjabloon</p>
+     <div className="animate-fade-up animate-fade-up-delay-1">
+                <HeroPhone />
               </div>
-            </div>
           </div>
         </section>
 
