@@ -228,7 +228,7 @@ export default function HomePage() {
                     <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[80px] h-[22px] bg-[#16161D] rounded-full z-10" />
                     <div className="rounded-[1.9rem] overflow-hidden" style={{ aspectRatio: "9/19.5" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="https://sponsalia.app/assets/marketing/templates/bloom-en-vetrina-b0c41e3e.jpg" alt="Bloom uitnodiging voorbeeld" className="w-full h-full object-cover object-top" width={240} height={520} style={{ backgroundColor: "#e8e4df" }} />
+                      <img src="https://sponsalia.app/assets/marketing/templates/bloom-en-vetrina-96e6b193.jpg" alt="Bloom uitnodiging voorbeeld" className="w-full h-full object-cover object-top" width={240} height={520} style={{ backgroundColor: "#e8e4df" }} />
                     </div>
                   </div>
                 </div>
