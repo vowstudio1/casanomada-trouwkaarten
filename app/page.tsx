@@ -18,7 +18,6 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const templates = [
-  const templates = [
   { name: "Bloom", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbloom-en-vetrina-96e6b193.jpg&w=1200&q=75", desc: "Coquette aquarel: linten, strikken en rozen rond een ovale cartouche." },
   { name: "Volta Celeste", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
   { name: "Zomertuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-e4c79ec8.jpg&w=1200&q=75", desc: "Groene tuin en een cartouche van roze kant." },
