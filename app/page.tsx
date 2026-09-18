@@ -196,8 +196,8 @@ export default function HomePage() {
 
         {/* HERO */}
         <section className="bg-white">
-          <div className="max-w-7xl mx-auto px-6 py-28">
-            <div className="grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-center">
+          <div className="max-w-7xl mx-auto px-6 py-20">
+            <div className="grid lg:grid-cols-[50%_50%] gap-12 lg:gap-16 items-center">
               <div className="animate-fade-up">
                 <div className="inline-flex items-center gap-2 bg-cream border border-gray-200 rounded-full px-4 py-1.5 mb-8">
                   <Heart size={12} className="text-brand-800" />
