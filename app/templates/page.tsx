@@ -21,6 +21,21 @@ export default function TemplatesPage() {
     >
       <Nav />
 
+      <style>{`
+        .tpl-card {
+          background-color: #FFFFFF;
+          border-radius: 1rem;
+          overflow: hidden;
+          border: 1px solid #E8E6E3;
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+          cursor: pointer;
+        }
+        .tpl-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 48px rgba(89,38,47,0.10);
+        }
+      `}</style>
+
       <main style={{ flex: 1 }}>
         {/* Header */}
         <section
@@ -110,25 +125,7 @@ export default function TemplatesPage() {
                 href={`/templates/${tpl.slug}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <article
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "1rem",
-                    overflow: "hidden",
-                    border: "1px solid #E8E6E3",
-                    transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-6px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      "0 20px 48px rgba(89,38,47,0.10)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                  }}
-                >
+                <article className="tpl-card">
                   {/* Template image */}
                   <div
                     style={{
