@@ -18,25 +18,27 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const templates = [
-  { name: "Bloom", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbloom-en-vetrina-b0c41e3e.jpg&w=1200&q=75", desc: "Coquette aquarel: linten, strikken en rozen rond een ovale cartouche." },
+  const templates = [
+  { name: "Bloom", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbloom-en-vetrina-96e6b193.jpg&w=1200&q=75", desc: "Coquette aquarel: linten, strikken en rozen rond een ovale cartouche." },
   { name: "Volta Celeste", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
-  { name: "Zomertuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-16e90ec0.jpg&w=1200&q=75", desc: "Groene tuin en een cartouche van roze kant." },
+  { name: "Zomertuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-e4c79ec8.jpg&w=1200&q=75", desc: "Groene tuin en een cartouche van roze kant." },
   { name: "Villa Aurora", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-aurora-en-vetrina-50b36ee0.jpg&w=1200&q=75", desc: "Terras bij zonsondergang, tijdloze luxe." },
-  { name: "Het Zwanenmeer", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Flago-dei-cigni-en-vetrina-4b04abc9.jpg&w=1200&q=75", desc: "Romantisch en luchtig, zachte tinten." },
+  { name: "Het Zwanenmeer", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Flago-dei-cigni-en-vetrina-6e0256ed.jpg&w=1200&q=75", desc: "Romantisch en luchtig, zachte tinten." },
   { name: "Villa Cortina", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-cortina-en-vetrina-553a7717.jpg&w=1200&q=75", desc: "Het gordijn opent de zaal, kant en kristal." },
-  { name: "Minimale Couture", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fcouture-minimale-en-vetrina-4240eaa9.jpg&w=1200&q=75", desc: "Essentieel, ruimte en adem." },
+  { name: "Minimale Couture", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fcouture-minimale-en-vetrina-93e7c6cd.jpg&w=1200&q=75", desc: "Essentieel, ruimte en adem." },
   { name: "Betoverd Bos", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fincanto-nel-bosco-en-vetrina-6c056d35.jpg&w=1200&q=75", desc: "Geschilderd bos en wilde rozen, groen en roze." },
-  { name: "Riviera 70", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Friviera-70-en-vetrina-5a764ed8.jpg&w=1200&q=75", desc: "Zonnig en vintage, jaren 70-sfeer." },
+  { name: "Riviera 70", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Friviera-70-en-vetrina-253c0193.jpg&w=1200&q=75", desc: "Zonnig en vintage, jaren 70-sfeer." },
   { name: "Italiaanse Aquarel", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Facquerello-italia-en-vetrina-3869b8cc.jpg&w=1200&q=75", desc: "Majolica en kust in aquarel." },
   { name: "Oro Antico", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Foro-antico-en-vetrina-22d36ceb.jpg&w=1200&q=75", desc: "Beige en oud goud, bloemrijk en elegant." },
-  { name: "Tuscany Chic", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftuscany-chic-en-vetrina-6c591e8d.jpg&w=1200&q=75", desc: "Warm en verfijnd, en plein air." },
+  { name: "Tuscany Chic", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftuscany-chic-en-vetrina-3646f639.jpg&w=1200&q=75", desc: "Warm en verfijnd, en plein air." },
   { name: "Gouden Uur", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftipografico-moderno-en-vetrina-2c921489.jpg&w=1200&q=75", desc: "Warm avondlicht, romantisch en intiem." },
-  { name: "De Geheime Tuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-segreto-en-vetrina-25ee18b2.jpg&w=1200&q=75", desc: "Rozenboog en Italiaanse tuin." },
+  { name: "De Geheime Tuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-segreto-en-vetrina-c0e0298d.jpg&w=1200&q=75", desc: "Rozenboog en Italiaanse tuin." },
   { name: "Tratto d'Inchiostro", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftratto-inchiostro-en-vetrina-48f6d0e0.jpg&w=1200&q=75", desc: "Penlijnen op papier, één enkele inkt." },
   { name: "Idillio", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fidillio-en-vetrina-4806113a.jpg&w=1200&q=75", desc: "Gouden strik en zwanen, alles licht." },
   { name: "Romantisch Botanisch", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbotanico-romantico-en-vetrina-5a476f93.jpg&w=1200&q=75", desc: "Bladeren en bloemen, delicaat." },
-  { name: "Strawberry Matcha", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-a6eb8665.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
+  { name: "Strawberry Matcha", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-4c490953.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
   { name: "Toile de Jouy", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftoile-bleu-en-vetrina-a0fc5d6a.jpg&w=1200&q=75", desc: "Toile in vier tinten op crème papier, zilveren of wit lint." },
+];
 ];
 
 const templateNames = [
