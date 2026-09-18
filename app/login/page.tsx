@@ -3,13 +3,16 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mail, ArrowRight } from "lucide-react";
+import { Mail, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +27,11 @@ export default function LoginPage() {
     });
 
     if (authError) {
-      setError(authError.message);
+      setError(
+        authError.message === "Invalid login credentials"
+          ? "Ongeldig e-mailadres of wachtwoord."
+          : authError.message
+      );
       setLoading(false);
       return;
     }
@@ -32,227 +39,244 @@ export default function LoginPage() {
     router.push("/dashboard");
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "0.75rem 0.875rem",
+    border: "1px solid #D1D5DB",
+    borderRadius: "0.625rem",
+    fontSize: "0.9375rem",
+    backgroundColor: "#FFFFFF",
+    color: "#16161D",
+    outline: "none",
+    boxSizing: "border-box",
+    fontFamily: "system-ui, sans-serif",
+    transition: "border-color 0.15s",
+  };
+
   return (
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#FAFAF8",
-        color: "#16161D",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "#f9f5f1",
       }}
     >
-      {/* Header */}
-      <header
-        style={{
-          padding: "1.5rem 2rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #E8E6E3",
-        }}
-      >
-        <Link
-          href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            color: "#59262F",
-            textDecoration: "none",
-            fontSize: "0.875rem",
-          }}
-        >
-          <ArrowLeft size={16} />
-          <span>Terug</span>
-        </Link>
-        <Link
-          href="/"
-          style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "1.5rem",
-            fontWeight: 600,
-            color: "#59262F",
-            textDecoration: "none",
-            letterSpacing: "0.05em",
-          }}
-        >
-          CASA NOMADA
-        </Link>
-        <div style={{ width: "4rem" }} />
-      </header>
+      <Nav />
 
-      {/* Login Form */}
       <main
         style={{
-          maxWidth: "28rem",
-          margin: "0 auto",
-          padding: "4rem 1.5rem",
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "3rem 1.5rem",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <h1
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "2rem",
-              fontWeight: 600,
-              color: "#59262F",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Inloggen
-          </h1>
-          <p
-            style={{
-              color: "#6B6B76",
-              fontSize: "0.9375rem",
-            }}
-          >
-            Welkom terug bij je bruiloftsplanner
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          {error && (
-            <div
-              style={{
-                backgroundColor: "#FEF2F2",
-                border: "1px solid #FECACA",
-                borderRadius: "0.5rem",
-                padding: "0.75rem 1rem",
-                marginBottom: "1.5rem",
-                color: "#991B1B",
-                fontSize: "0.875rem",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <div style={{ marginBottom: "1.25rem" }}>
-            <label
-              htmlFor="email"
-              style={{
-                display: "block",
-                fontSize: "0.8125rem",
-                fontWeight: 500,
-                color: "#16161D",
-                marginBottom: "0.375rem",
-              }}
-            >
-              E-mailadres
-            </label>
-            <div style={{ position: "relative" }}>
-              <Mail
-                size={16}
-                style={{
-                  position: "absolute",
-                  left: "0.75rem",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#9CA3AF",
-                }}
-              />
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="jouw@email.nl"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem 0.75rem 0.75rem 2.5rem",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "0.5rem",
-                  fontSize: "0.9375rem",
-                  backgroundColor: "#FFFFFF",
-                  color: "#16161D",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: "1.75rem" }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: "block",
-                fontSize: "0.8125rem",
-                fontWeight: 500,
-                color: "#16161D",
-                marginBottom: "0.375rem",
-              }}
-            >
-              Wachtwoord
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Je wachtwoord"
-              style={{
-                width: "100%",
-                padding: "0.75rem",
-                border: "1px solid #D1D5DB",
-                borderRadius: "0.5rem",
-                fontSize: "0.9375rem",
-                backgroundColor: "#FFFFFF",
-                color: "#16161D",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              backgroundColor: loading ? "#8B5A63" : "#59262F",
-              color: "#FFFFFF",
-              border: "none",
-              borderRadius: "0.5rem",
-              fontSize: "0.9375rem",
-              fontWeight: 500,
-              cursor: loading ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              transition: "background-color 0.2s",
-            }}
-          >
-            {loading ? "Bezig met inloggen..." : "Inloggen"}
-            {!loading && <ArrowRight size={16} />}
-          </button>
-        </form>
-
-        <p
+        <div
           style={{
-            textAlign: "center",
-            marginTop: "1.5rem",
-            fontSize: "0.875rem",
-            color: "#6B6B76",
+            width: "100%",
+            maxWidth: "26rem",
+            backgroundColor: "#FFFFFF",
+            borderRadius: "1.25rem",
+            border: "1px solid #E8E6E3",
+            padding: "2.5rem 2rem",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.05)",
           }}
         >
-          Nog geen account?{" "}
-          <Link
-            href="/register"
+          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+            <div
+              style={{
+                width: "3rem",
+                height: "3rem",
+                borderRadius: "50%",
+                backgroundColor: "#F9EDEE",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1.25rem",
+              }}
+            >
+              <Mail size={20} style={{ color: "#8B2635" }} />
+            </div>
+            <h1
+              style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: "1.75rem",
+                fontWeight: 600,
+                color: "#16161D",
+                marginBottom: "0.375rem",
+              }}
+            >
+              Welkom terug
+            </h1>
+            <p
+              style={{
+                color: "#6B6B76",
+                fontSize: "0.875rem",
+                fontFamily: "system-ui, sans-serif",
+              }}
+            >
+              Log in op je bruiloftsplanner
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div
+                style={{
+                  backgroundColor: "#FEF2F2",
+                  border: "1px solid #FECACA",
+                  borderRadius: "0.625rem",
+                  padding: "0.75rem 1rem",
+                  marginBottom: "1.25rem",
+                  color: "#991B1B",
+                  fontSize: "0.875rem",
+                  fontFamily: "system-ui, sans-serif",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            <div style={{ marginBottom: "1.125rem" }}>
+              <label
+                htmlFor="email"
+                style={{
+                  display: "block",
+                  fontSize: "0.8125rem",
+                  fontWeight: 500,
+                  color: "#16161D",
+                  marginBottom: "0.375rem",
+                  fontFamily: "system-ui, sans-serif",
+                }}
+              >
+                E-mailadres
+              </label>
+              <div style={{ position: "relative" }}>
+                <Mail
+                  size={15}
+                  style={{
+                    position: "absolute",
+                    left: "0.875rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#9CA3AF",
+                    pointerEvents: "none",
+                  }}
+                />
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="jouw@email.nl"
+                  style={{ ...inputStyle, paddingLeft: "2.5rem" }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#8B2635")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#D1D5DB")}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "1.75rem" }}>
+              <label
+                htmlFor="password"
+                style={{
+                  display: "block",
+                  fontSize: "0.8125rem",
+                  fontWeight: 500,
+                  color: "#16161D",
+                  marginBottom: "0.375rem",
+                  fontFamily: "system-ui, sans-serif",
+                }}
+              >
+                Wachtwoord
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Je wachtwoord"
+                  style={{ ...inputStyle, paddingRight: "2.75rem" }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#8B2635")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#D1D5DB")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "0.875rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#9CA3AF",
+                    padding: 0,
+                    display: "flex",
+                  }}
+                  aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "0.8125rem",
+                backgroundColor: loading ? "#B08086" : "#8B2635",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "9999px",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: loading ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                transition: "background-color 0.15s",
+                fontFamily: "system-ui, sans-serif",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {loading ? "Inloggen…" : "Inloggen"}
+              {!loading && <ArrowRight size={15} />}
+            </button>
+          </form>
+
+          <p
             style={{
-              color: "#59262F",
-              textDecoration: "underline",
-              fontWeight: 500,
+              textAlign: "center",
+              marginTop: "1.5rem",
+              fontSize: "0.875rem",
+              color: "#6B6B76",
+              fontFamily: "system-ui, sans-serif",
             }}
           >
-            Registreren
-          </Link>
-        </p>
+            Nog geen account?{" "}
+            <Link
+              href="/register"
+              style={{ color: "#8B2635", textDecoration: "underline", fontWeight: 500 }}
+            >
+              Registreren
+            </Link>
+          </p>
+        </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
