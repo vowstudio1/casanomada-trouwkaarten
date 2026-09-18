@@ -61,15 +61,10 @@ export default function InvitationPage({ params }: { params: { id: string } }) {
   const [submitError, setSubmitError] = useState("");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     async function loadInvitation() {
       try {
-        const { data: userData } = await supabase.auth.admin
-          ? { data: null }
-          : { data: null };
-
         // Try to get user profile from Supabase profiles table
         const { data } = await supabase
           .from("profiles")
@@ -310,7 +305,7 @@ export default function InvitationPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Content */}
-          <div ref={contentRef} style={{ maxWidth: "42rem", margin: "0 auto", padding: "3rem 1.5rem 5rem", animation: "fadeIn 0.7s ease 0.2s both" }}>
+          <div style={{ maxWidth: "42rem", margin: "0 auto", padding: "3rem 1.5rem 5rem", animation: "fadeIn 0.7s ease 0.2s both" }}>
 
             {/* Names & date */}
             <div style={{ textAlign: "center", marginBottom: "3rem" }}>
