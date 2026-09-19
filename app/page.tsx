@@ -186,7 +186,7 @@ export default function HomePage() {
           </nav>
           <div className="hidden md:flex items-center gap-4">
             <Link href="/dashboard" className="text-[13px] text-text-muted hover:text-[#16161D] transition-colors font-sans">Inloggen</Link>
-            <Link href="/templates" className="text-[13px] bg-brand-800 text-white px-5 py-2.5 rounded-full hover:bg-brand-700 transition-colors font-sans tracking-[0.1em] uppercase">Maak je uitnodiging</Link>
+            <Link href="/register" className="text-[13px] bg-brand-800 text-white px-5 py-2.5 rounded-full hover:bg-brand-700 transition-colors font-sans tracking-[0.1em] uppercase">Maak je uitnodiging</Link>
           </div>
           <button className="md:hidden p-2 text-[#16161D]" aria-label="Menu"><LayoutGrid size={20} /></button>
         </div>

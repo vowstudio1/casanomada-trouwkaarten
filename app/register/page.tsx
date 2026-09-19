@@ -1,451 +1,336 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Music, Palette } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
 import { templates } from "@/lib/templates";
 
-const MUSIC_OPTIONS = [
-  "Amber Glow", "Warm Embrace", "Romantic Piano", "Most Beautiful Day",
-  "Promise of Love", "Wedding Joy", "Garden Waltz", "Dolce Vita",
-  "Golden Hour", "Tender Rose", "Sky Waltz", "Geen",
-];
-
-const COLOR_OPTIONS = [
-  { name: "Origineel", value: "#F5EDE8" },
-  { name: "Bordeaux", value: "#8B2635" },
-  { name: "Nachtblauw", value: "#1E3A5F" },
-  { name: "Saliegroen", value: "#7A9E8E" },
-  { name: "Lavendel", value: "#9B89B4" },
-  { name: "Champagne", value: "#D4AF8A" },
-];
+const STAPPEN = ["Namen", "Datum & Locatie", "Sjabloon", "Stijl", "Account"];
 
 export default function RegisterPage() {
-  const [step, setStep] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const router = useRouter();
+
+  // Stap
+  const [stap, setStap] = useState(0);
+
+  // Gegevens
   const [partner1, setPartner1] = useState("");
   const [partner2, setPartner2] = useState("");
-  const [weddingDate, setWeddingDate] = useState("");
-  const [location, setLocation] = useState("");
-  const [selectedColor, setSelectedColor] = useState("Origineel");
-  const [selectedMusic, setSelectedMusic] = useState("Amber Glow");
+  const [datum, setDatum] = useState("");
+  const [tijd, setTijd] = useState("");
+  const [locatie, setLocatie] = useState("");
+  const [stad, setStad] = useState("");
+
+  // Sjabloon
+  const [selectedTemplate, setSelectedTemplate] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Stijl
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedMusic, setSelectedMusic] = useState(0);
+
+  // Account
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [wachtwoord, setWachtwoord] = useState("");
+  const [accepteer, setAccepteer] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const totalSteps = 4;
-  const progress = (step / totalSteps) * 100;
+  const currentTemplate = templates[selectedTemplate];
 
-  function nextStep() {
-    setError("");
-    if (step === 1 && !selectedTemplate) {
-      setError("Kies een sjabloon om door te gaan.");
-      return;
-    }
-    if (step === 2 && (!partner1.trim() || !partner2.trim() || !weddingDate)) {
-      setError("Vul de namen en de trouwdatum in.");
-      return;
-    }
-    setStep((s) => Math.min(s + 1, totalSteps));
-  }
-
-  function prevStep() {
-    setError("");
-    setStep((s) => Math.max(s - 1, 1));
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-
-    if (password.length < 6) {
-      setError("Wachtwoord moet minimaal 6 tekens bevatten.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Wachtwoorden komen niet overeen.");
-      return;
-    }
-
-    setLoading(true);
-
-    const { error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          partner1: partner1.trim(),
-          partner2: partner2.trim(),
-          wedding_date: weddingDate,
-          location: location.trim(),
-          template: selectedTemplate,
-          color: selectedColor,
-          music: selectedMusic,
-        },
-      },
-    });
-
-    if (authError) {
-      setError(authError.message);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      await fetch("/api/notify-registration", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: `${partner1.trim()} & ${partner2.trim()}`,
-          email,
-          template: selectedTemplate,
-        }),
-      });
-    } catch {
-      // Notification failure is non-blocking
-    }
-
-    setLoading(false);
-    setSuccess(true);
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "0.75rem 0.875rem",
-    border: "1px solid #D1D5DB",
-    borderRadius: "0.625rem",
-    fontSize: "0.9375rem",
-    backgroundColor: "#FFFFFF",
-    color: "#16161D",
-    outline: "none",
-    boxSizing: "border-box",
-    fontFamily: "system-ui, sans-serif",
+  const scroll = (dir: "left" | "right") => {
+    if (!carouselRef.current) return;
+    const w = carouselRef.current.offsetWidth;
+    carouselRef.current.scrollBy({ left: dir === "right" ? w * 0.6 : -w * 0.6, behavior: "smooth" });
   };
 
-  if (success) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#f9f5f1" }}>
-        <Nav />
-        <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "3rem 1.5rem" }}>
-          <div style={{ maxWidth: "28rem", textAlign: "center", backgroundColor: "#FFFFFF", borderRadius: "1.25rem", border: "1px solid #E8E6E3", padding: "3rem 2rem", boxShadow: "0 4px 24px rgba(0,0,0,0.05)" }}>
-            <div style={{ width: "4rem", height: "4rem", borderRadius: "50%", backgroundColor: "#F9EDEE", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
-              <Check size={24} style={{ color: "#8B2635" }} />
-            </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.75rem", fontWeight: 600, color: "#16161D", marginBottom: "0.75rem" }}>
-              Account aangemaakt!
-            </h2>
-            <p style={{ color: "#6B6B76", fontSize: "0.9375rem", lineHeight: 1.65, marginBottom: "2rem", fontFamily: "system-ui, sans-serif" }}>
-              Controleer je e-mail om je account te bevestigen. Daarna kun je direct inloggen en je uitnodiging afmaken.
-            </p>
-            <Link
-              href="/login"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 2rem", backgroundColor: "#8B2635", color: "#FFFFFF", borderRadius: "9999px", textDecoration: "none", fontSize: "0.875rem", fontWeight: 600, fontFamily: "system-ui, sans-serif" }}
-            >
-              Naar inloggen <ArrowRight size={15} />
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  const handleAccount = async () => {
+    if (!accepteer) { setError("Accepteer de voorwaarden om door te gaan"); return; }
+    setLoading(true);
+    setError("");
+    try {
+      const { data, error: authErr } = await supabase.auth.signUp({ email, password: wachtwoord });
+      if (authErr) throw authErr;
+      if (data.user) {
+        // Sla uitnodiging op
+        const { data: inv } = await supabase.from("invitations").insert({
+          user_id: data.user.id,
+          template_slug: currentTemplate.slug,
+          partner1_name: partner1,
+          partner2_name: partner2,
+          wedding_date: datum,
+          wedding_time: tijd,
+          location_name: locatie,
+          location_city: stad,
+          color_index: selectedColor,
+          music_index: selectedMusic,
+          published: false,
+        }).select().single();
+        if (inv) router.push(`/editor/${currentTemplate.slug}?id=${inv.id}`);
+        else router.push(`/editor/${currentTemplate.slug}`);
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Er ging iets mis");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const kanVerder = () => {
+    if (stap === 0) return partner1.length > 0 && partner2.length > 0;
+    if (stap === 1) return datum.length > 0;
+    if (stap === 2) return true;
+    if (stap === 3) return true;
+    if (stap === 4) return email.length > 0 && wachtwoord.length >= 6;
+    return true;
+  };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#f9f5f1" }}>
-      <Nav />
+    <div style={{ minHeight: "100vh", background: "#f9f5f1", display: "flex", flexDirection: "column" }}>
 
-      <main style={{ flex: 1, padding: "2.5rem 1.5rem 4rem" }}>
-        <div style={{ maxWidth: "52rem", margin: "0 auto" }}>
+      {/* Header */}
+      <header style={{ background: "white", borderBottom: "1px solid #ece8e4", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Link href="/" style={{ fontFamily: "sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: "0.18em", color: "#8B2635", textDecoration: "none" }}>CASA NOMADA</Link>
+        <Link href="/login" style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", textDecoration: "none" }}>Heb je al een account? <span style={{ color: "#8B2635", fontWeight: 500 }}>Inloggen</span></Link>
+      </header>
 
-          {/* Step indicator */}
-          <div style={{ marginBottom: "2.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-              <p style={{ fontSize: "0.8125rem", color: "#6B6B76", fontFamily: "system-ui, sans-serif" }}>
-                Stap {step} van {totalSteps}
-              </p>
-              <p style={{ fontSize: "0.8125rem", color: "#8B2635", fontWeight: 500, fontFamily: "system-ui, sans-serif" }}>
-                {step === 1 && "Kies een sjabloon"}
-                {step === 2 && "Jullie gegevens"}
-                {step === 3 && "Stijl & muziek"}
-                {step === 4 && "Account aanmaken"}
-              </p>
-            </div>
-            <div style={{ height: "4px", backgroundColor: "#E8E6E3", borderRadius: "9999px", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${progress}%`, backgroundColor: "#8B2635", borderRadius: "9999px", transition: "width 0.35s ease" }} />
+      {/* Progress bar */}
+      <div style={{ background: "white", borderBottom: "1px solid #ece8e4", padding: "0 24px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", paddingTop: 16, paddingBottom: 16 }}>
+          {/* Stap label */}
+          <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "#8B2635", marginBottom: 10 }}>
+            STAP {stap + 1} VAN {STAPPEN.length}: {STAPPEN[stap].toUpperCase()}
+          </p>
+          {/* Progress bar */}
+          <div style={{ display: "flex", gap: 4 }}>
+            {STAPPEN.map((_, i) => (
+              <div key={i} style={{ flex: 1, height: 3, borderRadius: 999, background: i <= stap ? "#8B2635" : "#e0dbd7", transition: "background 0.3s" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, maxWidth: 680, margin: "0 auto", width: "100%", padding: "40px 24px 120px" }}>
+
+        {/* ── STAP 0: Namen ── */}
+        {stap === 0 && (
+          <div>
+            <h1 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "#16161D", marginBottom: 8, lineHeight: 1.1 }}>Laten we jullie uitnodiging instellen</h1>
+            <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginBottom: 36 }}>Een paar stappen en jullie zijn klaar. Later kun je alles nog aanpassen.</p>
+            <h2 style={{ fontFamily: "serif", fontSize: 22, color: "#16161D", marginBottom: 20 }}>Jullie namen</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Partner 1</label>
+                <input value={partner1} onChange={e => setPartner1(e.target.value)} placeholder="Sophie" autoFocus
+                  style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Partner 2</label>
+                <input value={partner2} onChange={e => setPartner2(e.target.value)} placeholder="Thomas"
+                  style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+              </div>
             </div>
           </div>
+        )}
 
-          {error && (
-            <div style={{ backgroundColor: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "0.625rem", padding: "0.75rem 1rem", marginBottom: "1.5rem", color: "#991B1B", fontSize: "0.875rem", fontFamily: "system-ui, sans-serif" }}>
-              {error}
+        {/* ── STAP 1: Datum & Locatie ── */}
+        {stap === 1 && (
+          <div>
+            <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,4vw,2.4rem)", color: "#16161D", marginBottom: 8 }}>Datum en locatie</h2>
+            <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginBottom: 36 }}>Wanneer en waar vieren jullie de grote dag?</p>
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
+                <div>
+                  <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Datum *</label>
+                  <input type="date" value={datum} onChange={e => setDatum(e.target.value)}
+                    style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Tijdstip</label>
+                  <input type="time" value={tijd} onChange={e => setTijd(e.target.value)}
+                    style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Naam van de locatie</label>
+                <input value={locatie} onChange={e => setLocatie(e.target.value)} placeholder="Landgoed De Hooge Vuursche"
+                  style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Stad / Land</label>
+                <input value={stad} onChange={e => setStad(e.target.value)} placeholder="Amsterdam, Nederland"
+                  style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+              </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* ── STAP 1: Kies sjabloon ── */}
-          {step === 1 && (
-            <div>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 600, color: "#16161D", marginBottom: "0.5rem" }}>
-                Kies je sjabloon
-              </h1>
-              <p style={{ color: "#6B6B76", fontSize: "0.9375rem", fontFamily: "system-ui, sans-serif", marginBottom: "2rem", lineHeight: 1.6 }}>
-                Je kunt alles later nog aanpassen. Kies het ontwerp dat het best bij jullie past.
-              </p>
+        {/* ── STAP 2: Sjabloon ── */}
+        {stap === 2 && (
+          <div>
+            <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,4vw,2.4rem)", color: "#16161D", marginBottom: 8 }}>Sjabloon</h2>
+            <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginBottom: 8 }}>Je kunt het op elk moment wijzigen in de instellingen.</p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(220px, 100%), 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
-                {templates.map((tpl) => (
-                  <button
-                    key={tpl.slug}
-                    type="button"
-                    onClick={() => setSelectedTemplate(tpl.slug)}
-                    style={{
-                      padding: 0,
-                      border: selectedTemplate === tpl.slug ? "2.5px solid #8B2635" : "2px solid #E8E6E3",
-                      borderRadius: "0.875rem",
-                      overflow: "hidden",
-                      cursor: "pointer",
-                      background: "none",
-                      textAlign: "left",
-                      transition: "border-color 0.15s, box-shadow 0.15s",
-                      boxShadow: selectedTemplate === tpl.slug ? "0 0 0 3px rgba(139,38,53,0.15)" : "none",
-                    }}
-                  >
-                    <div style={{ aspectRatio: "4/3", overflow: "hidden", backgroundColor: "#F5EDE8" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={tpl.img} alt={tpl.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} loading="lazy" />
+            {/* Groot geselecteerd sjabloon preview */}
+            <div style={{ position: "relative", marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
+                <button onClick={() => setSelectedTemplate(t => Math.max(0, t - 1))} style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid #e0dbd7", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                  <ChevronLeft size={16} style={{ color: "#5a5550" }} />
+                </button>
+                <span style={{ fontFamily: "serif", fontSize: 18, color: "#16161D" }}>{currentTemplate.name}</span>
+                <button onClick={() => setSelectedTemplate(t => Math.min(templates.length - 1, t + 1))} style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid #e0dbd7", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                  <ChevronRight size={16} style={{ color: "#5a5550" }} />
+                </button>
+              </div>
+
+              {/* Carousel */}
+              <div style={{ position: "relative" }}>
+                <button onClick={() => scroll("left")} style={{ position: "absolute", left: -16, top: "50%", transform: "translateY(-50%)", zIndex: 10, width: 36, height: 36, borderRadius: "50%", border: "1px solid #e0dbd7", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                  <ChevronLeft size={14} />
+                </button>
+                <div ref={carouselRef} style={{ display: "flex", gap: 10, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 4, scrollSnapType: "x mandatory" }}>
+                  <style>{`.carousel::-webkit-scrollbar{display:none}`}</style>
+                  {templates.map((t, i) => (
+                    <div key={i} onClick={() => setSelectedTemplate(i)}
+                      style={{ flexShrink: 0, width: 120, scrollSnapAlign: "center", cursor: "pointer" }}>
+                      <div style={{ border: `2px solid ${selectedTemplate === i ? "#8B2635" : "transparent"}`, borderRadius: 12, overflow: "hidden", transition: "border 0.15s", position: "relative" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={t.img} alt={t.name} style={{ width: "100%", display: "block", aspectRatio: "9/16", objectFit: "cover" }} />
+                        {selectedTemplate === i && (
+                          <div style={{ position: "absolute", top: 6, right: 6, width: 20, height: 20, borderRadius: "50%", background: "#8B2635", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Check size={11} style={{ color: "white" }} />
+                          </div>
+                        )}
+                      </div>
+                      <p style={{ fontFamily: "sans-serif", fontSize: 11, color: selectedTemplate === i ? "#8B2635" : "#9a8e88", textAlign: "center" as const, marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{t.name}</p>
                     </div>
-                    <div style={{ padding: "0.75rem 0.875rem", backgroundColor: selectedTemplate === tpl.slug ? "#FDF6F7" : "#FFFFFF" }}>
-                      <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#16161D", fontFamily: "'Cormorant Garamond', Georgia, serif", marginBottom: "0.125rem" }}>
-                        {tpl.name}
-                      </p>
-                      <p style={{ fontSize: "0.6875rem", color: "#6B6B76", fontFamily: "system-ui, sans-serif", lineHeight: 1.4 }}>
-                        {tpl.tagline}
-                      </p>
-                      {selectedTemplate === tpl.slug && (
-                        <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.25rem", color: "#8B2635" }}>
-                          <Check size={12} />
-                          <span style={{ fontSize: "0.6875rem", fontWeight: 600, fontFamily: "system-ui, sans-serif" }}>Geselecteerd</span>
-                        </div>
-                      )}
-                    </div>
-                  </button>
+                  ))}
+                </div>
+                <button onClick={() => scroll("right")} style={{ position: "absolute", right: -16, top: "50%", transform: "translateY(-50%)", zIndex: 10, width: 36, height: 36, borderRadius: "50%", border: "1px solid #e0dbd7", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Live preview link */}
+            <Link href={`/templates/${currentTemplate.slug}`} target="_blank"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "sans-serif", fontSize: 13, color: "#8B2635", textDecoration: "none", marginTop: 8 }}>
+              In een tabblad openen ↗
+            </Link>
+          </div>
+        )}
+
+        {/* ── STAP 3: Stijl ── */}
+        {stap === 3 && (
+          <div>
+            <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,4vw,2.4rem)", color: "#16161D", marginBottom: 8 }}>Stijl kiezen</h2>
+            <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginBottom: 36 }}>Verandert alleen de kleuren, niet het ontwerp. Je kunt ze altijd nog aanpassen.</p>
+
+            {/* Kleuren als visuele swatches */}
+            <h3 style={{ fontFamily: "sans-serif", fontSize: 13, fontWeight: 600, color: "#16161D", marginBottom: 14 }}>Kleuren</h3>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const, marginBottom: 36 }}>
+              {currentTemplate.colors.map((color, i) => (
+                <button key={i} onClick={() => setSelectedColor(i)}
+                  style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 8, padding: "12px 16px", borderRadius: 14, border: `2px solid ${selectedColor === i ? "#8B2635" : "#e0dbd7"}`, background: "white", cursor: "pointer", minWidth: 80, transition: "all 0.15s" }}>
+                  {/* Kleur swatch */}
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg, #8B2635 50%, ${i === 1 ? "#d4af37" : i === 2 ? "#6b8e6b" : i === 3 ? "#4a6fa5" : "#c8a882"} 50%)`, border: "2px solid #e0dbd7" }} />
+                  <span style={{ fontFamily: "sans-serif", fontSize: 12, color: selectedColor === i ? "#8B2635" : "#6b6560", fontWeight: selectedColor === i ? 600 : 400 }}>{color.label}</span>
+                  {selectedColor === i && <Check size={12} style={{ color: "#8B2635" }} />}
+                </button>
+              ))}
+            </div>
+
+            {/* Muziek */}
+            <h3 style={{ fontFamily: "sans-serif", fontSize: 13, fontWeight: 600, color: "#16161D", marginBottom: 14 }}>Muziek</h3>
+            <div style={{ border: "1.5px solid #e0dbd7", borderRadius: 14, overflow: "hidden", background: "white" }}>
+              {currentTemplate.music.map((m, i) => (
+                <div key={i} onClick={() => setSelectedMusic(i)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: i < currentTemplate.music.length - 1 ? "1px solid #ece8e4" : "none", cursor: "pointer", background: selectedMusic === i ? "#fdf6f4" : "white" }}>
+                  <span style={{ fontFamily: "sans-serif", fontSize: 14, color: selectedMusic === i ? "#8B2635" : "#5a5550" }}>{m}</span>
+                  {selectedMusic === i && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8B2635" }} />}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ background: "#f0f4ff", borderRadius: 12, padding: "12px 16px", marginTop: 20, display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <span style={{ fontSize: 16 }}>ℹ️</span>
+              <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#4a5568", margin: 0 }}>Lettertypes en al het andere pas je later aan, in de uitnodigingseditor.</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── STAP 4: Account ── */}
+        {stap === 4 && (
+          <div>
+            <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,4vw,2.4rem)", color: "#16161D", marginBottom: 8 }}>Maak je account aan</h2>
+            <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginBottom: 8 }}>om door te gaan naar casanomada-trouwkaarten.netlify.app</p>
+
+            {/* Samenvatting */}
+            <div style={{ background: "#fdf6f4", border: "1px solid #f0e0db", borderRadius: 14, padding: "16px 20px", marginBottom: 28 }}>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "6px 16px" }}>
+                {[
+                  { label: "Namen", value: `${partner1} & ${partner2}` },
+                  { label: "Datum", value: datum ? new Date(datum).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }) : "—" },
+                  { label: "Locatie", value: locatie || stad || "—" },
+                  { label: "Sjabloon", value: currentTemplate.name },
+                ].map(({ label, value }) => (
+                  <div key={label} style={{ display: "flex", gap: 6 }}>
+                    <span style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>{label}:</span>
+                    <span style={{ fontFamily: "sans-serif", fontSize: 12, color: "#16161D", fontWeight: 500 }}>{value}</span>
+                  </div>
                 ))}
               </div>
+            </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <button onClick={nextStep} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 2rem", backgroundColor: "#8B2635", color: "#FFFFFF", border: "none", borderRadius: "9999px", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-                  Volgende <ArrowRight size={15} />
-                </button>
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 12, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>E-mailadres</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jouw@email.com"
+                  style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Wachtwoord (min. 6 tekens)</label>
+                <input type="password" value={wachtwoord} onChange={e => setWachtwoord(e.target.value)} placeholder="••••••••"
+                  style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "14px 16px", fontFamily: "sans-serif", fontSize: 15, color: "#16161D", outline: "none", boxSizing: "border-box" as const, background: "white" }} />
               </div>
             </div>
-          )}
 
-          {/* ── STAP 2: Gegevens ── */}
-          {step === 2 && (
-            <div style={{ maxWidth: "36rem" }}>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 600, color: "#16161D", marginBottom: "0.5rem" }}>
-                Jullie gegevens
-              </h1>
-              <p style={{ color: "#6B6B76", fontSize: "0.9375rem", fontFamily: "system-ui, sans-serif", marginBottom: "2rem" }}>
-                Alles wat je invult, verschijnt direct in je uitnodiging.
-              </p>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 20 }}>
+              <input type="checkbox" checked={accepteer} onChange={e => setAccepteer(e.target.checked)}
+                style={{ marginTop: 3, width: 16, height: 16, accentColor: "#8B2635", flexShrink: 0 }} />
+              <span style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", lineHeight: 1.5 }}>
+                Ik accepteer de <Link href="/voorwaarden" style={{ color: "#8B2635" }}>Algemene Voorwaarden</Link> en het <Link href="/privacy" style={{ color: "#8B2635" }}>Privacybeleid</Link>
+              </span>
+            </label>
 
-              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "1rem", border: "1px solid #E8E6E3", padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>
-                      Naam partner 1
-                    </label>
-                    <input type="text" required value={partner1} onChange={(e) => setPartner1(e.target.value)} placeholder="Sophie" style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>
-                      Naam partner 2
-                    </label>
-                    <input type="text" required value={partner2} onChange={(e) => setPartner2(e.target.value)} placeholder="Thomas" style={inputStyle} />
-                  </div>
-                </div>
+            {error && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#dc2626", marginBottom: 12 }}>{error}</p>}
 
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>
-                    Trouwdatum
-                  </label>
-                  <input type="date" required value={weddingDate} onChange={(e) => setWeddingDate(e.target.value)} style={inputStyle} />
-                </div>
+            <button onClick={handleAccount} disabled={loading || !kanVerder() || !accepteer}
+              style={{ width: "100%", background: "#8B2635", color: "white", border: "none", borderRadius: 999, padding: "16px", fontFamily: "sans-serif", fontSize: 15, fontWeight: 600, cursor: loading || !kanVerder() || !accepteer ? "not-allowed" : "pointer", opacity: loading || !kanVerder() || !accepteer ? 0.6 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              {loading ? "Bezig..." : <>Maak een gratis account om jullie uitnodiging te bewaren <ArrowRight size={16} /></>}
+            </button>
+          </div>
+        )}
+      </div>
 
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>
-                    Locatie <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(optioneel)</span>
-                  </label>
-                  <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Kasteel Hoensbroek, Limburg" style={inputStyle} />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1.75rem" }}>
-                <button onClick={prevStep} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 1.5rem", backgroundColor: "transparent", color: "#6B6B76", border: "1px solid #E8E6E3", borderRadius: "9999px", fontSize: "0.875rem", cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-                  <ArrowLeft size={15} /> Terug
-                </button>
-                <button onClick={nextStep} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 2rem", backgroundColor: "#8B2635", color: "#FFFFFF", border: "none", borderRadius: "9999px", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-                  Volgende <ArrowRight size={15} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── STAP 3: Kleur & muziek ── */}
-          {step === 3 && (
-            <div style={{ maxWidth: "36rem" }}>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 600, color: "#16161D", marginBottom: "0.5rem" }}>
-                Stijl & muziek
-              </h1>
-              <p style={{ color: "#6B6B76", fontSize: "0.9375rem", fontFamily: "system-ui, sans-serif", marginBottom: "2rem" }}>
-                Kies het kleurpalet en de achtergrondmuziek voor jullie uitnodiging.
-              </p>
-
-              {/* Kleuren */}
-              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "1rem", border: "1px solid #E8E6E3", padding: "1.75rem", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-                  <Palette size={18} style={{ color: "#8B2635" }} />
-                  <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "#16161D", fontFamily: "system-ui, sans-serif" }}>Kleurpalet</h2>
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                  {COLOR_OPTIONS.map((c) => (
-                    <button
-                      key={c.name}
-                      type="button"
-                      onClick={() => setSelectedColor(c.name)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        padding: "0.5rem 0.875rem",
-                        border: selectedColor === c.name ? "2px solid #8B2635" : "2px solid #E8E6E3",
-                        borderRadius: "9999px",
-                        cursor: "pointer",
-                        backgroundColor: selectedColor === c.name ? "#FDF6F7" : "#FFFFFF",
-                        transition: "all 0.15s",
-                        fontFamily: "system-ui, sans-serif",
-                      }}
-                    >
-                      <span style={{ width: "14px", height: "14px", borderRadius: "50%", backgroundColor: c.value, border: "1px solid rgba(0,0,0,0.1)", display: "inline-block", flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.8125rem", color: selectedColor === c.name ? "#8B2635" : "#16161D", fontWeight: selectedColor === c.name ? 600 : 400 }}>
-                        {c.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Muziek */}
-              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "1rem", border: "1px solid #E8E6E3", padding: "1.75rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-                  <Music size={18} style={{ color: "#8B2635" }} />
-                  <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "#16161D", fontFamily: "system-ui, sans-serif" }}>Achtergrondmuziek</h2>
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem" }}>
-                  {MUSIC_OPTIONS.map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setSelectedMusic(m)}
-                      style={{
-                        padding: "0.5rem 0.875rem",
-                        border: selectedMusic === m ? "2px solid #8B2635" : "2px solid #E8E6E3",
-                        borderRadius: "9999px",
-                        cursor: "pointer",
-                        backgroundColor: selectedMusic === m ? "#FDF6F7" : "#FFFFFF",
-                        fontSize: "0.8125rem",
-                        color: selectedMusic === m ? "#8B2635" : "#16161D",
-                        fontWeight: selectedMusic === m ? 600 : 400,
-                        transition: "all 0.15s",
-                        fontFamily: "system-ui, sans-serif",
-                      }}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1.75rem" }}>
-                <button onClick={prevStep} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 1.5rem", backgroundColor: "transparent", color: "#6B6B76", border: "1px solid #E8E6E3", borderRadius: "9999px", fontSize: "0.875rem", cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-                  <ArrowLeft size={15} /> Terug
-                </button>
-                <button onClick={nextStep} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 2rem", backgroundColor: "#8B2635", color: "#FFFFFF", border: "none", borderRadius: "9999px", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-                  Volgende <ArrowRight size={15} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── STAP 4: Account ── */}
-          {step === 4 && (
-            <div style={{ maxWidth: "36rem" }}>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 600, color: "#16161D", marginBottom: "0.5rem" }}>
-                Maak je account aan
-              </h1>
-              <p style={{ color: "#6B6B76", fontSize: "0.9375rem", fontFamily: "system-ui, sans-serif", marginBottom: "2rem" }}>
-                Je uitnodiging wordt opgeslagen in je account. Je kunt hem later altijd aanpassen.
-              </p>
-
-              {/* Summary */}
-              <div style={{ backgroundColor: "#FDF6F7", border: "1px solid #F0D0D4", borderRadius: "0.875rem", padding: "1.125rem 1.25rem", marginBottom: "1.5rem" }}>
-                <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#8B2635", fontFamily: "system-ui, sans-serif", marginBottom: "0.5rem" }}>Samenvatting</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.5rem" }}>
-                  {[
-                    { label: "Sjabloon", value: templates.find(t => t.slug === selectedTemplate)?.name || selectedTemplate },
-                    { label: "Partners", value: partner1 && partner2 ? `${partner1} & ${partner2}` : "—" },
-                    { label: "Datum", value: weddingDate || "—" },
-                    { label: "Kleur", value: selectedColor },
-                    { label: "Muziek", value: selectedMusic },
-                  ].map(({ label, value }) => (
-                    <div key={label}>
-                      <span style={{ fontSize: "0.75rem", color: "#9B6977", fontFamily: "system-ui, sans-serif" }}>{label}: </span>
-                      <span style={{ fontSize: "0.75rem", color: "#16161D", fontWeight: 500, fontFamily: "system-ui, sans-serif" }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} style={{ backgroundColor: "#FFFFFF", borderRadius: "1rem", border: "1px solid #E8E6E3", padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.125rem" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>E-mailadres</label>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jouw@email.nl" autoComplete="email" style={inputStyle} />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>Wachtwoord</label>
-                  <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimaal 6 tekens" autoComplete="new-password" style={inputStyle} />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "#16161D", marginBottom: "0.375rem", fontFamily: "system-ui, sans-serif" }}>Wachtwoord bevestigen</label>
-                  <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Herhaal je wachtwoord" autoComplete="new-password" style={inputStyle} />
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "0.5rem" }}>
-                  <button type="button" onClick={prevStep} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 1.5rem", backgroundColor: "transparent", color: "#6B6B76", border: "1px solid #E8E6E3", borderRadius: "9999px", fontSize: "0.875rem", cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-                    <ArrowLeft size={15} /> Terug
-                  </button>
-                  <button type="submit" disabled={loading} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8125rem 2rem", backgroundColor: loading ? "#B08086" : "#8B2635", color: "#FFFFFF", border: "none", borderRadius: "9999px", fontSize: "0.875rem", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", fontFamily: "system-ui, sans-serif" }}>
-                    {loading ? "Account aanmaken…" : "Account aanmaken"} {!loading && <ArrowRight size={15} />}
-                  </button>
-                </div>
-              </form>
-
-              <p style={{ textAlign: "center", marginTop: "1.25rem", fontSize: "0.875rem", color: "#6B6B76", fontFamily: "system-ui, sans-serif" }}>
-                Al een account?{" "}
-                <Link href="/login" style={{ color: "#8B2635", textDecoration: "underline", fontWeight: 500 }}>Inloggen</Link>
-              </p>
-            </div>
-          )}
+      {/* Navigatie balk onderaan */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(8px)", borderTop: "1px solid #ece8e4", padding: "14px 24px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button onClick={() => stap > 0 && setStap(s => s - 1)}
+            style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "sans-serif", fontSize: 14, color: stap === 0 ? "#c0b8b4" : "#5a5550", background: "none", border: "none", cursor: stap === 0 ? "default" : "pointer" }} disabled={stap === 0}>
+            <ArrowLeft size={16} /> Terug
+          </button>
+          {stap < 4 ? (
+            <button onClick={() => kanVerder() && setStap(s => s + 1)} disabled={!kanVerder()}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: kanVerder() ? "#8B2635" : "#e0dbd7", color: "white", border: "none", borderRadius: 999, padding: "12px 28px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 500, cursor: kanVerder() ? "pointer" : "not-allowed", transition: "background 0.2s" }}>
+              Doorgaan <ArrowRight size={15} />
+            </button>
+          ) : null}
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 }
