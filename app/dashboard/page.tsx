@@ -1,107 +1,64 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getTemplate } from "@/lib/templates";
-import { Copy, Check, Users, Mail, LogOut, Plus, Eye, Send, ExternalLink } from "lucide-react";
+import { Bell, Settings, LogOut, Plus, Eye, Users, MessageSquare, Image, QrCode, Edit3, Send, Check, ChevronRight, X } from "lucide-react";
 
-const TIKKIE_URL = "https://tikkie.me/pay/ch43q8tuu0jco3beatpf";
-
-type Invitation = {
-  id: string; template_slug: string; partner1_name: string; partner2_name: string;
-  wedding_date: string; location_name: string; published: boolean; paid: boolean; created_at: string;
+type Wedding = {
+  id: string; partner1_first: string; partner2_first: string; wedding_date: string;
+  city: string; template_slug: string; status: string; slug: string; package: string;
+  guests: { count: number }[]; rsvps: { count: number }[]; photos: { count: number }[]; messages: { count: number }[];
 };
-type Guest = {
-  id: string; name: string; email: string; token: string; opened_at: string | null;
-  rsvp: { attending: boolean; diet: string; message: string }[];
-};
+type Notification = { id: string; type: string; title: string; message: string; read: boolean; created_at: string };
 
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const [selectedInv, setSelectedInv] = useState<Invitation | null>(null);
-  const [guests, setGuests] = useState<Guest[]>([]);
+  const [user, setUser] = useState<{ id: string; email: string; first_name?: string } | null>(null);
+  const [weddings, setWeddings] = useState<Wedding[]>([]);
+  const [selected, setSelected] = useState<Wedding | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotif, setShowNotif] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"uitnodiging" | "gasten" | "statistieken">("uitnodiging");
-  const [copied, setCopied] = useState<string | null>(null);
+  const [session, setSession] = useState<string | null>(null);
 
-  // Gast toevoegen
-  const [newGuestName, setNewGuestName] = useState("");
-  const [newGuestEmail, setNewGuestEmail] = useState("");
-  const [addingGuest, setAddingGuest] = useState(false);
+  const loadData = useCallback(async (token: string, userId: string) => {
+    const res = await fetch("/api/weddings", { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      setWeddings(data); setSelected(data[0]);
+    }
+    const { data: notifs } = await supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(20);
+    setNotifications(notifs || []);
+  }, []);
 
   useEffect(() => {
-    async function load() {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      if (!u) { router.push("/login"); return; }
-      setUser({ id: u.id, email: u.email ?? "" });
-
-      const { data: invs } = await supabase
-        .from("invitations").select("*").eq("user_id", u.id).order("created_at", { ascending: false });
-      setInvitations(invs || []);
-      if (invs && invs.length > 0) {
-        setSelectedInv(invs[0]);
-        loadGuests(invs[0].id, u.id);
-      }
-      setLoading(false);
-    }
-    load();
-  }, [router]);
-
-  const loadGuests = async (invId: string, userId: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    const res = await fetch(`/api/guests?invitation_id=${invId}`, {
-      headers: { Authorization: `Bearer ${session.access_token}` }
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!s) { router.push("/login"); return; }
+      setSession(s.access_token);
+      supabase.from("profiles").select("*").eq("id", s.user.id).single().then(({ data: profile }) => {
+        setUser({ id: s.user.id, email: s.user.email || "", first_name: profile?.first_name });
+      });
+      loadData(s.access_token, s.user.id).finally(() => setLoading(false));
     });
-    const data = await res.json();
-    setGuests(Array.isArray(data) ? data : []);
+  }, [router, loadData]);
+
+  const markRead = async (id: string) => {
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+    setNotifications(n => n.map(x => x.id === id ? { ...x, read: true } : x));
   };
 
-  const addGuest = async () => {
-    if (!newGuestName || !selectedInv) return;
-    setAddingGuest(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    await fetch("/api/guests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ invitation_id: selectedInv.id, guests: [{ name: newGuestName, email: newGuestEmail }] })
-    });
-    setNewGuestName(""); setNewGuestEmail("");
-    setAddingGuest(false);
-    loadGuests(selectedInv.id, user!.id);
-  };
+  const logout = async () => { await supabase.auth.signOut(); router.push("/"); };
 
-  const publishInvitation = async () => {
-    if (!selectedInv) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    await fetch("/api/publish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ invitation_id: selectedInv.id })
-    });
-    const updated = { ...selectedInv, published: true, paid: true };
-    setSelectedInv(updated);
-    setInvitations(invs => invs.map(i => i.id === updated.id ? updated : i));
-  };
-
-  const copyLink = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
-
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
+  const unread = notifications.filter(n => !n.read).length;
+  const template = selected ? getTemplate(selected.template_slug) : null;
+  const namen = selected ? `${selected.partner1_first} & ${selected.partner2_first}` : "";
+  const guests = selected?.guests?.[0]?.count || 0;
+  const rsvps = selected?.rsvps?.[0]?.count || 0;
+  const photos = selected?.photos?.[0]?.count || 0;
+  const msgs = selected?.messages?.[0]?.count || 0;
+  const datum = selected?.wedding_date ? new Date(selected.wedding_date).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }) : "";
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: "#f9f5f1", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -110,269 +67,199 @@ export default function Dashboard() {
     </div>
   );
 
-  const template = selectedInv ? getTemplate(selectedInv.template_slug) : null;
-  const namen = selectedInv ? `${selectedInv.partner1_name} & ${selectedInv.partner2_name}` : "";
-  const aanwezig = guests.filter(g => g.rsvp?.[0]?.attending).length;
-  const afwezig = guests.filter(g => g.rsvp?.[0] && !g.rsvp[0].attending).length;
-  const geopend = guests.filter(g => g.opened_at).length;
-
   return (
     <div style={{ minHeight: "100vh", background: "#f9f5f1" }}>
       {/* Header */}
-      <header style={{ background: "white", borderBottom: "1px solid #ece8e4", position: "sticky", top: 0, zIndex: 50 }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontFamily: "sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: "0.18em", color: "#8B2635", textDecoration: "none" }}>CASA NOMADA</Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <span style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88" }}>{user?.email}</span>
-            <button onClick={logout} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "sans-serif", fontSize: 13, color: "#6b6560" }}>
+      <header style={{ background: "white", borderBottom: "1px solid #ece8e4", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <Link href="/" style={{ fontFamily: "sans-serif", fontSize: 13, fontWeight: 700, letterSpacing: "0.2em", color: "#8B2635", textDecoration: "none" }}>CASA NOMADA</Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ position: "relative" }}>
+              <button onClick={() => setShowNotif(!showNotif)} style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid #e0dbd7", background: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}>
+                <Bell size={16} style={{ color: "#5a5550" }} />
+                {unread > 0 && <div style={{ position: "absolute", top: -2, right: -2, width: 16, height: 16, borderRadius: "50%", background: "#8B2635", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 9, color: "white", fontWeight: 700 }}>{unread}</span></div>}
+              </button>
+              {showNotif && (
+                <div style={{ position: "absolute", top: 44, right: 0, width: 320, background: "white", borderRadius: 14, border: "1px solid #ece8e4", boxShadow: "0 8px 32px rgba(0,0,0,0.12)", zIndex: 200, overflow: "hidden" }}>
+                  <div style={{ padding: "14px 16px", borderBottom: "1px solid #ece8e4", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <p style={{ fontFamily: "sans-serif", fontSize: 13, fontWeight: 600, color: "#16161D" }}>Notificaties</p>
+                    <button onClick={() => setShowNotif(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={14} style={{ color: "#9a8e88" }} /></button>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <p style={{ padding: "20px 16px", fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", textAlign: "center" }}>Geen notificaties</p>
+                  ) : notifications.slice(0, 8).map(n => (
+                    <div key={n.id} onClick={() => markRead(n.id)} style={{ padding: "12px 16px", borderBottom: "1px solid #ece8e4", background: n.read ? "white" : "#fdf6f4", cursor: "pointer" }}>
+                      <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#16161D", fontWeight: n.read ? 400 : 600 }}>{n.title}</p>
+                      {n.message && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginTop: 2 }}>{n.message.slice(0, 60)}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Link href="/dashboard/settings" style={{ width: 36, height: 36, borderRadius: "50%", border: "1px solid #e0dbd7", background: "white", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
+              <Settings size={16} style={{ color: "#5a5550" }} />
+            </Link>
+            <button onClick={logout} style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", background: "none", border: "none", cursor: "pointer" }}>
               <LogOut size={14} /> Uitloggen
             </button>
           </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px" }}>
+        {/* Welkom */}
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontFamily: "serif", fontSize: "clamp(1.6rem,3vw,2.2rem)", color: "#16161D" }}>
+            {user?.first_name ? `Welkom, ${user.first_name}` : "Welkom bij Casa Nomada"}
+          </h1>
+          {weddings.length === 0 && <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginTop: 4 }}>Begin met het aanmaken van je eerste digitale trouwkaart.</p>}
+        </div>
 
-        {/* Geen uitnodiging */}
-        {invitations.length === 0 ? (
-          <div style={{ textAlign: "center" as const, padding: "80px 24px" }}>
-            <h2 style={{ fontFamily: "serif", fontSize: 28, color: "#16161D", marginBottom: 12 }}>Nog geen uitnodiging</h2>
+        {weddings.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 24px", background: "white", borderRadius: 20, border: "1px solid #ece8e4" }}>
+            <p style={{ fontSize: 48, marginBottom: 16 }}>💌</p>
+            <h2 style={{ fontFamily: "serif", fontSize: 28, color: "#16161D", marginBottom: 8 }}>Nog geen uitnodiging</h2>
             <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#6b6560", marginBottom: 28 }}>Maak je eerste digitale trouwkaart aan.</p>
-            <Link href="/register" style={{ background: "#8B2635", color: "white", borderRadius: 999, padding: "14px 28px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>
-              Maak je uitnodiging
+            <Link href="/register" style={{ background: "#8B2635", color: "white", borderRadius: 999, padding: "14px 28px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 500, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Plus size={16} /> Maak je uitnodiging
             </Link>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 24, alignItems: "start" }}>
-
+          <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 24, alignItems: "start" }}>
             {/* Sidebar */}
-            <div>
-              {/* Uitnodigingen */}
-              <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", overflow: "hidden", marginBottom: 16 }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid #ece8e4" }}>
-                  <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "#9a8e88" }}>Mijn uitnodigingen</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Bruiloft switcher */}
+              <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", overflow: "hidden" }}>
+                <div style={{ padding: "14px 18px", borderBottom: "1px solid #ece8e4" }}>
+                  <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88" }}>Mijn bruiloften</p>
                 </div>
-                {invitations.map(inv => (
-                  <div key={inv.id} onClick={() => { setSelectedInv(inv); loadGuests(inv.id, user!.id); }}
-                    style={{ padding: "14px 20px", cursor: "pointer", background: selectedInv?.id === inv.id ? "#fdf6f4" : "white", borderBottom: "1px solid #ece8e4", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                {weddings.map(w => (
+                  <button key={w.id} onClick={() => setSelected(w)} style={{ width: "100%", padding: "14px 18px", cursor: "pointer", background: selected?.id === w.id ? "#fdf6f4" : "white", border: "none", borderBottom: "1px solid #ece8e4", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}>
                     <div>
-                      <p style={{ fontFamily: "serif", fontSize: 15, color: "#16161D" }}>{inv.partner1_name} & {inv.partner2_name}</p>
-                      <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", marginTop: 2 }}>{getTemplate(inv.template_slug)?.name}</p>
+                      <p style={{ fontFamily: "serif", fontSize: 15, color: "#16161D" }}>{w.partner1_first} & {w.partner2_first}</p>
+                      <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", marginTop: 2 }}>{w.status === "published" ? "✓ Live" : w.status === "paid" ? "✓ Betaald" : "Concept"}</p>
                     </div>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: inv.published ? "#16a34a" : "#e0dbd7" }} />
-                  </div>
+                    <ChevronRight size={14} style={{ color: "#c0b8b4" }} />
+                  </button>
                 ))}
-                <Link href="/register" style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 20px", fontFamily: "sans-serif", fontSize: 13, color: "#8B2635", textDecoration: "none" }}>
-                  <Plus size={14} /> Nieuwe uitnodiging
+                <Link href="/register" style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 18px", fontFamily: "sans-serif", fontSize: 13, color: "#8B2635", textDecoration: "none" }}>
+                  <Plus size={14} /> Nieuwe bruiloft
                 </Link>
               </div>
 
-              {/* Statistieken */}
-              {selectedInv && (
-                <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "16px 20px" }}>
-                  <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "#9a8e88", marginBottom: 14 }}>Overzicht</p>
-                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
-                    {[
-                      { label: "Gasten", value: guests.length, icon: "👥" },
-                      { label: "Geopend", value: geopend, icon: "👁" },
-                      { label: "Aanwezig", value: aanwezig, icon: "✓" },
-                      { label: "Afwezig", value: afwezig, icon: "✗" },
-                    ].map(({ label, value, icon }) => (
-                      <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560" }}>{icon} {label}</span>
-                        <span style={{ fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, color: "#16161D" }}>{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Snelle navigatie */}
+              <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", overflow: "hidden" }}>
+                {[
+                  { icon: Edit3, label: "Bewerk uitnodiging", href: `/dashboard/builder` },
+                  { icon: Users, label: "Gasten beheren", href: `/dashboard/guests` },
+                  { icon: Check, label: "RSVP overzicht", href: `/dashboard/rsvp` },
+                  { icon: Image, label: "Fotoalbum", href: `/dashboard/photos` },
+                  { icon: MessageSquare, label: "Berichten", href: `/dashboard/messages` },
+                  { icon: QrCode, label: "QR codes", href: `/dashboard/qr` },
+                  { icon: Settings, label: "Instellingen", href: `/dashboard/settings` },
+                ].map(({ icon: Icon, label, href }) => (
+                  <Link key={href} href={href} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 18px", fontFamily: "sans-serif", fontSize: 14, color: "#5a5550", textDecoration: "none", borderBottom: "1px solid #ece8e4" }}>
+                    <Icon size={15} style={{ color: "#8B2635" }} /> {label}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             {/* Hoofdcontent */}
-            {selectedInv && (
-              <div>
-                {/* Tabs */}
-                <div style={{ display: "flex", gap: 0, background: "white", borderRadius: 12, border: "1px solid #ece8e4", padding: 4, marginBottom: 20 }}>
-                  {(["uitnodiging", "gasten", "statistieken"] as const).map(t => (
-                    <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", background: tab === t ? "#8B2635" : "transparent", color: tab === t ? "white" : "#6b6560", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer", textTransform: "capitalize" as const }}>
-                      {t}
-                    </button>
+            {selected && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                {/* Hero card */}
+                <div style={{ background: "white", borderRadius: 20, border: "1px solid #ece8e4", overflow: "hidden" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 0 }}>
+                    {template && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={template.img} alt={template.name} style={{ width: "100%", height: "100%", objectFit: "cover", minHeight: 220 }} />
+                    )}
+                    <div style={{ padding: "28px 28px 24px" }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 999, background: selected.status === "published" ? "#f0fdf4" : selected.status === "paid" ? "#eff6ff" : "#fdf6f4", marginBottom: 16 }}>
+                        <div style={{ width: 7, height: 7, borderRadius: "50%", background: selected.status === "published" ? "#16a34a" : selected.status === "paid" ? "#2563eb" : "#e0a000" }} />
+                        <span style={{ fontFamily: "sans-serif", fontSize: 12, color: selected.status === "published" ? "#15803d" : selected.status === "paid" ? "#1d4ed8" : "#854d0e" }}>
+                          {selected.status === "published" ? "Gepubliceerd" : selected.status === "paid" ? "Betaald — klaar om te publiceren" : "Concept"}
+                        </span>
+                      </div>
+                      <h2 style={{ fontFamily: "serif", fontSize: 32, color: "#16161D", marginBottom: 4 }}>{namen}</h2>
+                      {datum && <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#6b6560", marginBottom: 2 }}>{datum}</p>}
+                      {selected.city && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", marginBottom: 20 }}>{selected.city}</p>}
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        <Link href="/dashboard/builder" style={{ display: "flex", alignItems: "center", gap: 6, background: "#8B2635", color: "white", borderRadius: 999, padding: "10px 18px", fontFamily: "sans-serif", fontSize: 13, textDecoration: "none" }}>
+                          <Edit3 size={13} /> Bewerk
+                        </Link>
+                        <Link href={`/invite/${selected.slug}`} target="_blank" style={{ display: "flex", alignItems: "center", gap: 6, background: "white", border: "1.5px solid #e0dbd7", color: "#5a5550", borderRadius: 999, padding: "10px 18px", fontFamily: "sans-serif", fontSize: 13, textDecoration: "none" }}>
+                          <Eye size={13} /> Voorbeeld
+                        </Link>
+                        {selected.status !== "published" && (
+                          <Link href="/dashboard/billing" style={{ display: "flex", alignItems: "center", gap: 6, background: "#16161D", color: "white", borderRadius: 999, padding: "10px 18px", fontFamily: "sans-serif", fontSize: 13, textDecoration: "none" }}>
+                            <Send size={13} /> {selected.status === "paid" ? "Publiceer nu" : "Koop & publiceer"}
+                          </Link>
+                        )}
+                        {selected.status === "published" && (
+                          <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/invite/${selected.slug}`); }} style={{ display: "flex", alignItems: "center", gap: 6, background: "white", border: "1.5px solid #e0dbd7", color: "#5a5550", borderRadius: 999, padding: "10px 18px", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer" }}>
+                            📋 Kopieer link
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+                  {[
+                    { label: "Gasten", value: guests, icon: "👥", color: "#8B2635", href: "/dashboard/guests" },
+                    { label: "RSVP", value: rsvps, icon: "✓", color: "#16a34a", href: "/dashboard/rsvp" },
+                    { label: "Foto's", value: photos, icon: "📷", color: "#2563eb", href: "/dashboard/photos" },
+                    { label: "Berichten", value: msgs, icon: "💌", color: "#7c3aed", href: "/dashboard/messages" },
+                  ].map(({ label, value, icon, color, href }) => (
+                    <Link key={label} href={href} style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "20px", textAlign: "center", textDecoration: "none" }}>
+                      <p style={{ fontSize: 24, marginBottom: 6 }}>{icon}</p>
+                      <p style={{ fontFamily: "serif", fontSize: 32, color, fontWeight: 600, lineHeight: 1 }}>{value}</p>
+                      <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginTop: 4 }}>{label}</p>
+                    </Link>
                   ))}
                 </div>
 
-                {/* TAB: Uitnodiging */}
-                {tab === "uitnodiging" && (
-                  <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "24px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "start" }}>
-                      {/* Template preview */}
-                      <div>
-                        {template && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={template.img} alt={template.name} style={{ width: "100%", borderRadius: 12, display: "block" }} />
-                        )}
-                      </div>
-                      {/* Info */}
-                      <div>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 999, background: selectedInv.published ? "#f0fdf4" : "#fdf6f4", marginBottom: 16 }}>
-                          <div style={{ width: 7, height: 7, borderRadius: "50%", background: selectedInv.published ? "#16a34a" : "#e0a000" }} />
-                          <span style={{ fontFamily: "sans-serif", fontSize: 12, color: selectedInv.published ? "#15803d" : "#854d0e" }}>
-                            {selectedInv.published ? "Gepubliceerd" : "Concept"}
-                          </span>
-                        </div>
-                        <h2 style={{ fontFamily: "serif", fontSize: 24, color: "#16161D", marginBottom: 6 }}>{namen}</h2>
-                        <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", marginBottom: 20 }}>{template?.name}</p>
-
-                        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: 24 }}>
-                          <Link href={`/editor/${selectedInv.template_slug}`} style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "sans-serif", fontSize: 13, color: "#8B2635", textDecoration: "none" }}>
-                            <Eye size={14} /> Bewerk uitnodiging
-                          </Link>
-                          {selectedInv.published && (
-                            <Link href={`/invitation/${selectedInv.id}`} target="_blank" style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "sans-serif", fontSize: 13, color: "#8B2635", textDecoration: "none" }}>
-                              <ExternalLink size={14} /> Bekijk live uitnodiging
-                            </Link>
-                          )}
-                        </div>
-
-                        {/* Publiceren */}
-                        {!selectedInv.published ? (
-                          <div style={{ border: "1.5px solid #e0dbd7", borderRadius: 14, padding: "20px" }}>
-                            <h4 style={{ fontFamily: "serif", fontSize: 16, color: "#16161D", marginBottom: 8 }}>Publiceer jullie uitnodiging</h4>
-                            <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", marginBottom: 16, lineHeight: 1.5 }}>Betaal eenmalig €89 via Tikkie en publiceer daarna direct.</p>
-                            <a href={TIKKIE_URL} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#009DE0", color: "white", borderRadius: 12, padding: "13px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, textDecoration: "none", marginBottom: 10 }}>
-                              💳 Betaal via Tikkie — €89
-                            </a>
-                            <button onClick={publishInvitation} style={{ width: "100%", background: "#16161D", color: "white", border: "none", borderRadius: 12, padding: "13px", fontFamily: "sans-serif", fontSize: 14, cursor: "pointer" }}>
-                              ✓ Betaald — Publiceer nu
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            {/* Deel de uitnodiging */}
-                            <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 8 }}>Algemene link (voor alle gasten):</p>
-                            <div style={{ display: "flex", gap: 8, background: "#f5f0ed", borderRadius: 10, padding: "10px 14px", alignItems: "center", marginBottom: 16 }}>
-                              <span style={{ fontFamily: "sans-serif", fontSize: 12, color: "#5a5550", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
-                                {baseUrl}/invitation/{selectedInv.id}
-                              </span>
-                              <button onClick={() => copyLink(`${baseUrl}/invitation/${selectedInv.id}`, "inv")} style={{ background: "#8B2635", color: "white", border: "none", borderRadius: 6, padding: "5px 10px", fontFamily: "sans-serif", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                                {copied === "inv" ? <Check size={11} /> : <Copy size={11} />} {copied === "inv" ? "Gekopieerd" : "Kopieer"}
-                              </button>
-                            </div>
-                            <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#6b6560" }}>
-                              💡 Voeg gasten toe voor unieke links per persoon →
-                              <button onClick={() => setTab("gasten")} style={{ background: "none", border: "none", color: "#8B2635", cursor: "pointer", fontFamily: "sans-serif", fontSize: 12, marginLeft: 4 }}>Gasten beheren</button>
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                {/* Recente notificaties */}
+                {notifications.filter(n => !n.read).length > 0 && (
+                  <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", overflow: "hidden" }}>
+                    <div style={{ padding: "16px 20px", borderBottom: "1px solid #ece8e4" }}>
+                      <p style={{ fontFamily: "sans-serif", fontSize: 13, fontWeight: 600, color: "#16161D" }}>Ongelezen notificaties</p>
                     </div>
-                  </div>
-                )}
-
-                {/* TAB: Gasten */}
-                {tab === "gasten" && (
-                  <div>
-                    {/* Gast toevoegen */}
-                    <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "20px", marginBottom: 16 }}>
-                      <h3 style={{ fontFamily: "serif", fontSize: 18, color: "#16161D", marginBottom: 16 }}>Gast toevoegen</h3>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10 }}>
-                        <input value={newGuestName} onChange={e => setNewGuestName(e.target.value)} placeholder="Naam" onKeyDown={e => e.key === "Enter" && addGuest()} style={{ border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "10px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none" }} />
-                        <input value={newGuestEmail} onChange={e => setNewGuestEmail(e.target.value)} placeholder="E-mail (optioneel)" style={{ border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "10px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none" }} />
-                        <button onClick={addGuest} disabled={!newGuestName || addingGuest} style={{ background: "#8B2635", color: "white", border: "none", borderRadius: 10, padding: "10px 16px", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" as const }}>
-                          <Plus size={14} /> Voeg toe
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Gastenlijst */}
-                    <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", overflow: "hidden" }}>
-                      {guests.length === 0 ? (
-                        <div style={{ padding: "40px", textAlign: "center" as const }}>
-                          <Users size={32} style={{ color: "#e0dbd7", margin: "0 auto 12px" }} />
-                          <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88" }}>Nog geen gasten. Voeg gasten toe voor unieke links.</p>
+                    {notifications.filter(n => !n.read).slice(0, 5).map(n => (
+                      <div key={n.id} onClick={() => markRead(n.id)} style={{ padding: "14px 20px", borderBottom: "1px solid #ece8e4", cursor: "pointer", background: "#fdf6f4", display: "flex", alignItems: "flex-start", gap: 12 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8B2635", flexShrink: 0, marginTop: 4 }} />
+                        <div>
+                          <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#16161D", fontWeight: 600 }}>{n.title}</p>
+                          {n.message && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginTop: 2 }}>{n.message}</p>}
                         </div>
-                      ) : (
-                        <table style={{ width: "100%", borderCollapse: "collapse" as const }}>
-                          <thead>
-                            <tr style={{ borderBottom: "1px solid #ece8e4" }}>
-                              {["Naam", "Status", "RSVP", "Unieke link", ""].map(h => (
-                                <th key={h} style={{ padding: "12px 16px", textAlign: "left" as const, fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#9a8e88", fontWeight: 500 }}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {guests.map((g, i) => {
-                              const rsvp = g.rsvp?.[0];
-                              const link = `${baseUrl}/i/${g.token}`;
-                              return (
-                                <tr key={g.id} style={{ borderBottom: i < guests.length - 1 ? "1px solid #ece8e4" : "none" }}>
-                                  <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 14, color: "#16161D" }}>{g.name}</td>
-                                  <td style={{ padding: "14px 16px" }}>
-                                    <span style={{ fontFamily: "sans-serif", fontSize: 12, color: g.opened_at ? "#15803d" : "#9a8e88", background: g.opened_at ? "#f0fdf4" : "#f5f0ed", padding: "3px 8px", borderRadius: 999 }}>
-                                      {g.opened_at ? "Geopend" : "Nog niet geopend"}
-                                    </span>
-                                  </td>
-                                  <td style={{ padding: "14px 16px" }}>
-                                    {rsvp ? (
-                                      <span style={{ fontFamily: "sans-serif", fontSize: 12, color: rsvp.attending ? "#15803d" : "#dc2626", background: rsvp.attending ? "#f0fdf4" : "#fef2f2", padding: "3px 8px", borderRadius: 999 }}>
-                                        {rsvp.attending ? "✓ Aanwezig" : "✗ Afwezig"}
-                                      </span>
-                                    ) : (
-                                      <span style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>—</span>
-                                    )}
-                                  </td>
-                                  <td style={{ padding: "14px 16px" }}>
-                                    <span style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", fontFamily: "monospace" as const }}>/i/{g.token}</span>
-                                  </td>
-                                  <td style={{ padding: "14px 16px" }}>
-                                    <button onClick={() => copyLink(link, g.id)} style={{ background: "none", border: "1px solid #e0dbd7", borderRadius: 6, padding: "5px 10px", fontFamily: "sans-serif", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, color: "#5a5550" }}>
-                                      {copied === g.id ? <Check size={11} style={{ color: "#16a34a" }} /> : <Copy size={11} />}
-                                      {copied === g.id ? "Gekopieerd!" : "Kopieer link"}
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* TAB: Statistieken */}
-                {tab === "statistieken" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-                    {[
-                      { label: "Totaal gasten", value: guests.length, color: "#8B2635", icon: "👥" },
-                      { label: "Geopend", value: geopend, color: "#2563eb", icon: "👁" },
-                      { label: "Aanwezig", value: aanwezig, color: "#16a34a", icon: "✓" },
-                      { label: "Afwezig", value: afwezig, color: "#dc2626", icon: "✗" },
-                      { label: "Wacht op reactie", value: guests.length - aanwezig - afwezig, color: "#e0a000", icon: "⏳" },
-                      { label: "Respons %", value: guests.length > 0 ? Math.round(((aanwezig + afwezig) / guests.length) * 100) + "%" : "—", color: "#8B2635", icon: "%" },
-                    ].map(({ label, value, color, icon }) => (
-                      <div key={label} style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "24px", textAlign: "center" as const }}>
-                        <p style={{ fontSize: 28, marginBottom: 6 }}>{icon}</p>
-                        <p style={{ fontFamily: "serif", fontSize: 36, color, fontWeight: 600, lineHeight: 1 }}>{value}</p>
-                        <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", marginTop: 6 }}>{label}</p>
                       </div>
                     ))}
-                    {/* RSVP berichten */}
-                    {guests.some(g => g.rsvp?.[0]?.message) && (
-                      <div style={{ gridColumn: "span 2", background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "20px" }}>
-                        <h4 style={{ fontFamily: "serif", fontSize: 18, color: "#16161D", marginBottom: 16 }}>Berichten van gasten</h4>
-                        <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
-                          {guests.filter(g => g.rsvp?.[0]?.message).map(g => (
-                            <div key={g.id} style={{ background: "#fdf6f4", borderRadius: 10, padding: "12px 16px" }}>
-                              <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#8B2635", marginBottom: 4, fontWeight: 600 }}>{g.name}</p>
-                              <p style={{ fontFamily: "serif", fontSize: 14, fontStyle: "italic", color: "#5a5550" }}>"{g.rsvp[0].message}"</p>
-                              {g.rsvp[0].diet && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginTop: 4 }}>Dieet: {g.rsvp[0].diet}</p>}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
+
+                {/* Snelle acties */}
+                <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", padding: "20px 24px" }}>
+                  <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88", marginBottom: 16 }}>Snelle acties</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                    {[
+                      { label: "Gast toevoegen", href: "/dashboard/guests", icon: "👤" },
+                      { label: "Preview bekijken", href: `/invite/${selected.slug}`, icon: "👀" },
+                      { label: "QR downloaden", href: "/dashboard/qr", icon: "📱" },
+                      { label: "RSVP bekijken", href: "/dashboard/rsvp", icon: "📋" },
+                      { label: "Foto's bekijken", href: "/dashboard/photos", icon: "🖼️" },
+                      { label: "Tafelindeling", href: "/dashboard/tables", icon: "🪑" },
+                    ].map(({ label, href, icon }) => (
+                      <Link key={label} href={href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "16px 12px", background: "#f9f5f1", borderRadius: 12, textDecoration: "none", textAlign: "center" }}>
+                        <span style={{ fontSize: 22 }}>{icon}</span>
+                        <span style={{ fontFamily: "sans-serif", fontSize: 12, color: "#5a5550" }}>{label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
