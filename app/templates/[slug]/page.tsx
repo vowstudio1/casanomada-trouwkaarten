@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { getTemplate, templates } from "@/lib/templates";
+import CardOpening from "@/components/CardOpening";
 
 const MUSIC_URL = "https://cdn.pixabay.com/audio/2023/11/10/audio_d4d18e7aa3.mp3";
 
@@ -197,30 +198,19 @@ export default function TemplateDetailPage() {
                     {/* Scherm */}
                     <div style={{ borderRadius: "clamp(26px,4.5vw,42px)", overflow: "hidden", position: "relative", aspectRatio: "9/19.5", background: "#f9f3ef" }}>
 
-                      {/* GESLOTEN */}
-                      {demoPhase === "closed" && (
-                        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#f5ede8" }}>
-                          <div style={{ position: "relative", width: "74%", aspectRatio: "5/3.5" }}>
-                            <div style={{ position: "absolute", inset: 0, borderRadius: 8, background: "#fff8f5", border: "1px solid #ddd0c8", boxShadow: "0 8px 32px rgba(139,38,53,0.1), 0 2px 8px rgba(0,0,0,0.07)" }} />
-                            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "52%", overflow: "hidden", borderRadius: "8px 8px 0 0" }}>
-                              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #edddd5 50%, transparent 50%)" }} />
-                              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(225deg, #edddd5 50%, transparent 50%)" }} />
-                            </div>
-                            <div style={{ position: "absolute", bottom: 0, left: 0, width: "50%", height: "52%", background: "linear-gradient(315deg, #e5cec5 50%, transparent 50%)", borderBottomLeftRadius: 8 }} />
-                            <div style={{ position: "absolute", bottom: 0, right: 0, width: "50%", height: "52%", background: "linear-gradient(225deg, #e5cec5 50%, transparent 50%)", borderBottomRightRadius: 8 }} />
-                            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10, width: 34, height: 34, borderRadius: "50%", background: "radial-gradient(circle at 38% 38%, #b03545, #8B2635 50%, #701e2a)", border: "1.5px solid #701e2a", boxShadow: "0 3px 12px rgba(139,38,53,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <span style={{ color: "#f5ddd8", fontSize: "clamp(8px,1.5vw,11px)", fontFamily: "serif", fontStyle: "italic" }}>CN</span>
-                            </div>
-                          </div>
-                          <p style={{ marginTop: 14, fontSize: "clamp(7px,1.2vw,9px)", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#8B2635", fontFamily: "sans-serif", opacity: 0.7 }}>Tik om te openen</p>
-                        </div>
-                      )}
-
-                      {/* OPENING */}
-                      {demoPhase === "opening" && (
-                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#f5ede8", zIndex: 5 }}>
-                          <style>{`@keyframes envFly{0%{transform:scale(1) rotate(0deg) translateY(0);opacity:1}40%{transform:scale(1.1) rotate(-5deg) translateY(-5%);opacity:1}100%{transform:scale(0.12) rotate(15deg) translateY(-150%);opacity:0}}`}</style>
-                          <div style={{ width: "74%", aspectRatio: "5/3.5", background: "#fff8f5", borderRadius: 8, border: "1px solid #ddd0c8", boxShadow: "0 8px 32px rgba(139,38,53,0.18)", animation: "envFly 0.95s cubic-bezier(.4,0,.2,1) forwards" }} />
+                      {/* CardOpening animatie — vervangt gesloten + opening fase */}
+                      {demoPhase !== "open" && (
+                        <div style={{ position: "absolute", inset: 0 }}>
+                          <CardOpening
+                            templateSlug={template.slug}
+                            templateImg={template.img}
+                            onComplete={() => {
+                              setDemoPhase("open");
+                              audioRef.current?.play().catch(() => {});
+                              setMusicPlaying(true);
+                              setTimeout(() => scrollRef.current?.scrollTo({ top: 400, behavior: "smooth" }), 600);
+                            }}
+                          />
                         </div>
                       )}
 
