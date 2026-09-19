@@ -1,96 +1,115 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { ArrowLeft, Download } from "lucide-react";
+import DashboardLayout from "@/components/dashboard/Layout";
+import { Download, Users, CheckCircle, XCircle, Clock } from "lucide-react";
 
-type Rsvp = { id: string; name: string; attending: boolean; adults: number; children: number; diet: string; allergies: string; message: string; created_at: string };
+type RSVP = { id: string; guest_name: string; status: string; dietary_wishes: string; message: string; created_at: string; plus_one: boolean; };
 
-export default function RsvpPage() {
+export default function RSVPPage() {
   const router = useRouter();
-  const [rsvps, setRsvps] = useState<Rsvp[]>([]);
+  const [rsvps, setRSVPs] = useState<RSVP[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<"all" | "confirmed" | "declined">("all");
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push("/login"); return; }
-      const wRes = await fetch("/api/weddings", { headers: { Authorization: `Bearer ${session.access_token}` } });
-      const ws = await wRes.json();
-      if (!ws[0]) { setLoading(false); return; }
-      const res = await fetch(`/api/rsvp?wedding_id=${ws[0].id}`, { headers: { Authorization: `Bearer ${session.access_token}` } });
-      const data = await res.json();
-      setRsvps(Array.isArray(data) ? data : []);
+      const res = await fetch("/api/weddings", { headers: { Authorization: `Bearer ${session.access_token}` } });
+      const ws = await res.json();
+      if (ws[0]) {
+        const { data } = await supabase.from("rsvps").select("*").eq("wedding_id", ws[0].id).order("created_at", { ascending: false });
+        setRSVPs(data || []);
+      }
       setLoading(false);
     });
   }, [router]);
 
+  const confirmed = rsvps.filter(r => r.status === "confirmed");
+  const declined = rsvps.filter(r => r.status === "declined");
+  const filtered = rsvps.filter(r => filter === "all" || r.status === filter);
+
   const exportCSV = () => {
-    const rows = [["Naam", "Aanwezig", "Volwassenen", "Kinderen", "Dieet", "Bericht", "Datum"], ...rsvps.map(r => [r.name, r.attending ? "Ja" : "Nee", r.adults, r.children, r.diet || "", r.message || "", new Date(r.created_at).toLocaleDateString("nl-NL")])];
+    const rows = [["Naam", "Status", "Plus 1", "Dieetwensen", "Bericht", "Datum"], ...rsvps.map(r => [r.guest_name, r.status === "confirmed" ? "Aanwezig" : "Afwezig", r.plus_one ? "Ja" : "Nee", r.dietary_wishes || "", r.message || "", new Date(r.created_at).toLocaleDateString("nl-NL")])];
     const csv = rows.map(r => r.join(",")).join("\n");
-    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "rsvp.csv"; a.click();
+    const a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    a.download = "rsvp.csv";
+    a.click();
   };
 
-  const filtered = filter === "all" ? rsvps : rsvps.filter(r => filter === "yes" ? r.attending : !r.attending);
-  const aanwezig = rsvps.filter(r => r.attending).length;
-  const afwezig = rsvps.filter(r => !r.attending).length;
-
-  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style><div style={{ width: 36, height: 36, border: "2px solid #8B2635", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /></div>;
+  if (loading) return <DashboardLayout><div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "50vh" }}><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style><div style={{ width: 32, height: 32, border: "2px solid #8B2635", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /></div></DashboardLayout>;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f9f5f1" }}>
-      <header style={{ background: "white", borderBottom: "1px solid #ece8e4", position: "sticky", top: 0, zIndex: 50 }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", gap: 16 }}>
-          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", textDecoration: "none" }}><ArrowLeft size={14} /> Dashboard</Link>
-          <div style={{ width: 1, height: 20, background: "#e0dbd7" }} />
-          <span style={{ fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, color: "#16161D" }}>RSVP Overzicht</span>
-          <button onClick={exportCSV} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, background: "white", border: "1px solid #e0dbd7", borderRadius: 8, padding: "8px 14px", fontFamily: "sans-serif", fontSize: 12, cursor: "pointer", color: "#5a5550" }}><Download size={13} /> Export CSV</button>
-        </div>
-      </header>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 20 }}>
-          {[{ l: "Totaal reacties", v: rsvps.length, c: "#8B2635" }, { l: "Aanwezig", v: aanwezig, c: "#16a34a" }, { l: "Afwezig", v: afwezig, c: "#dc2626" }].map(({ l, v, c }) => (
-            <div key={l} style={{ background: "white", borderRadius: 14, border: "1px solid #ece8e4", padding: "20px", textAlign: "center" }}>
-              <p style={{ fontFamily: "serif", fontSize: 36, color: c, fontWeight: 600, lineHeight: 1 }}>{v}</p>
-              <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", marginTop: 4 }}>{l}</p>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          {[["all", "Alle"], ["yes", "Aanwezig"], ["no", "Afwezig"]].map(([v, l]) => (
-            <button key={v} onClick={() => setFilter(v)} style={{ padding: "8px 16px", borderRadius: 999, border: `1.5px solid ${filter === v ? "#8B2635" : "#e0dbd7"}`, background: filter === v ? "#8B2635" : "white", color: filter === v ? "white" : "#5a5550", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer" }}>{l}</button>
-          ))}
-        </div>
-        <div style={{ background: "white", borderRadius: 16, border: "1px solid #ece8e4", overflow: "hidden" }}>
-          {filtered.length === 0 ? (
-            <div style={{ padding: "48px", textAlign: "center" }}>
-              <p style={{ fontSize: 36, marginBottom: 12 }}>📋</p>
-              <p style={{ fontFamily: "serif", fontSize: 20, color: "#16161D", marginBottom: 6 }}>Nog geen RSVP's</p>
-              <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88" }}>RSVP's verschijnen hier zodra gasten bevestigen.</p>
-            </div>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr style={{ borderBottom: "1px solid #ece8e4" }}>
-                {["Naam", "Aanwezig", "Volwassenen", "Kinderen", "Dieet", "Bericht", "Datum"].map(h => <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#9a8e88", fontWeight: 500 }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {filtered.map((r, i) => (
-                  <tr key={r.id} style={{ borderBottom: i < filtered.length - 1 ? "1px solid #ece8e4" : "none" }}>
-                    <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 14, color: "#16161D", fontWeight: 500 }}>{r.name}</td>
-                    <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "sans-serif", fontSize: 12, color: r.attending ? "#16a34a" : "#dc2626", background: r.attending ? "#f0fdf4" : "#fef2f2", padding: "3px 8px", borderRadius: 999 }}>{r.attending ? "✓ Ja" : "✗ Nee"}</span></td>
-                    <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 14, color: "#5a5550" }}>{r.adults || 1}</td>
-                    <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 14, color: "#5a5550" }}>{r.children || 0}</td>
-                    <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 13, color: "#6b6560" }}>{r.diet || "—"}</td>
-                    <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", maxWidth: 200 }}><p style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.message || "—"}</p></td>
-                    <td style={{ padding: "14px 16px", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>{new Date(r.created_at).toLocaleDateString("nl-NL")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <DashboardLayout>
+      <div style={{ maxWidth: 880, margin: "0 auto", padding: "28px 24px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <div>
+            <h1 style={{ fontFamily: "serif", fontSize: 28, color: "#16161D", marginBottom: 4 }}>RSVP</h1>
+            <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88" }}>{rsvps.length} reacties ontvangen</p>
+          </div>
+          {rsvps.length > 0 && (
+            <button onClick={exportCSV} style={{ display: "flex", alignItems: "center", gap: 6, background: "white", border: "1.5px solid #e0dbd7", borderRadius: 999, padding: "10px 18px", fontFamily: "sans-serif", fontSize: 13, color: "#5a5550", cursor: "pointer" }}>
+              <Download size={14} /> Exporteer CSV
+            </button>
           )}
         </div>
+
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
+          {[
+            { label: "Aanwezig", count: confirmed.length, icon: CheckCircle, color: "#28a745", bg: "#f0faf0" },
+            { label: "Afwezig", count: declined.length, icon: XCircle, color: "#8B2635", bg: "#fff0f0" },
+            { label: "Totaal", count: rsvps.length, icon: Users, color: "#5a5550", bg: "#f5f0ec" },
+          ].map(({ label, count, icon: Icon, color, bg }) => (
+            <div key={label} style={{ background: "white", borderRadius: 14, border: "1px solid #ece8e4", padding: "18px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 42, height: 42, borderRadius: "50%", background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon size={20} style={{ color }} />
+              </div>
+              <div>
+                <p style={{ fontFamily: "sans-serif", fontSize: 24, fontWeight: 700, color: "#16161D" }}>{count}</p>
+                <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          {(["all", "confirmed", "declined"] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{ padding: "8px 16px", borderRadius: 999, border: filter === f ? "none" : "1px solid #e0dbd7", background: filter === f ? "#8B2635" : "white", color: filter === f ? "white" : "#6b6560", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer" }}>
+              {f === "all" ? "Alle" : f === "confirmed" ? "Aanwezig" : "Afwezig"}
+            </button>
+          ))}
+        </div>
+
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 16, border: "1px solid #ece8e4" }}>
+            <Clock size={40} style={{ color: "#c0b8b4", margin: "0 auto 16px" }} />
+            <p style={{ fontFamily: "serif", fontSize: 20, color: "#9a8e88" }}>Nog geen RSVP's ontvangen</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {filtered.map(rsvp => (
+              <div key={rsvp.id} style={{ background: "white", borderRadius: 12, border: "1px solid #ece8e4", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                    <p style={{ fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, color: "#16161D" }}>{rsvp.guest_name}</p>
+                    {rsvp.plus_one && <span style={{ fontFamily: "sans-serif", fontSize: 10, background: "#f5f0ec", color: "#5a5550", borderRadius: 999, padding: "2px 6px" }}>+1</span>}
+                    <span style={{ fontFamily: "sans-serif", fontSize: 11, borderRadius: 999, padding: "2px 8px", background: rsvp.status === "confirmed" ? "#f0faf0" : "#fff0f0", color: rsvp.status === "confirmed" ? "#28a745" : "#8B2635" }}>
+                      {rsvp.status === "confirmed" ? "Aanwezig" : "Afwezig"}
+                    </span>
+                  </div>
+                  {rsvp.dietary_wishes && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>Dieet: {rsvp.dietary_wishes}</p>}
+                  {rsvp.message && <p style={{ fontFamily: "serif", fontSize: 13, color: "#5a5550", fontStyle: "italic", marginTop: 4 }}>"{rsvp.message}"</p>}
+                </div>
+                <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#c0b8b4", marginLeft: 12, flexShrink: 0 }}>{new Date(rsvp.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
