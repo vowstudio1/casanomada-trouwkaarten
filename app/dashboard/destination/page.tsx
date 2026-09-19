@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/dashboard/Layout";
 import { MapPin, Plane, Hotel, Info, ExternalLink, Save, Check } from "lucide-react";

@@ -1,9 +1,10 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import DashboardLayout from "@/components/dashboard/Layout";
-import { TEMPLATES } from "@/lib/templates";
+import { templates as TEMPLATES } from "@/lib/templates";
 import { Check, Save } from "lucide-react";
 
 const FONTS = [
