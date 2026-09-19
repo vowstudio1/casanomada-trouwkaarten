@@ -1,592 +1,168 @@
+"use client";
 import Link from "next/link";
-import {
-  Heart,
-  Check,
-  ArrowRight,
-  Minus as MinusIcon,
-  LayoutGrid,
-  Star,
-  Mail,
-  Camera,
-} from "lucide-react";
-import FAQAccordion from "@/components/FAQAccordion";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { templates } from "@/lib/templates";
+import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 import HeroPhone from "@/components/HeroPhone";
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[12px] tracking-[1.68px] uppercase text-brand-800 mb-5 font-sans font-semibold">
-    {children}
-  </p>
-);
-
-const templates = [
-  { slug: "bloom", name: "Bloom", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbloom-en-vetrina-96e6b193.jpg&w=1200&q=75", desc: "Coquette aquarel: linten, strikken en rozen rond een ovale cartouche." },
-  { slug: "volta-celeste", name: "Volta Celeste", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvolta-celeste-en-vetrina-63b82e9f.jpg&w=1200&q=75", desc: "Geschilderde lucht en wit rankwerk, stoffen strik." },
-  { slug: "zomertuin", name: "Zomertuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-destate-en-vetrina-e4c79ec8.jpg&w=1200&q=75", desc: "Groene tuin en een cartouche van roze kant." },
-  { slug: "villa-aurora", name: "Villa Aurora", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-aurora-en-vetrina-50b36ee0.jpg&w=1200&q=75", desc: "Terras bij zonsondergang, tijdloze luxe." },
-  { slug: "het-zwanenmeer", name: "Het Zwanenmeer", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Flago-dei-cigni-en-vetrina-6e0256ed.jpg&w=1200&q=75", desc: "Romantisch en luchtig, zachte tinten." },
-  { slug: "villa-cortina", name: "Villa Cortina", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fvilla-cortina-en-vetrina-553a7717.jpg&w=1200&q=75", desc: "Het gordijn opent de zaal, kant en kristal." },
-  { slug: "minimale-couture", name: "Minimale Couture", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fcouture-minimale-en-vetrina-93e7c6cd.jpg&w=1200&q=75", desc: "Essentieel, ruimte en adem." },
-  { slug: "betoverd-bos", name: "Betoverd Bos", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fincanto-nel-bosco-en-vetrina-6c056d35.jpg&w=1200&q=75", desc: "Geschilderd bos en wilde rozen, groen en roze." },
-  { slug: "riviera-70", name: "Riviera 70", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Friviera-70-en-vetrina-253c0193.jpg&w=1200&q=75", desc: "Zonnig en vintage, jaren 70-sfeer." },
-  { slug: "italiaanse-aquarel", name: "Italiaanse Aquarel", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Facquerello-italia-en-vetrina-3869b8cc.jpg&w=1200&q=75", desc: "Majolica en kust in aquarel." },
-  { slug: "oro-antico", name: "Oro Antico", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Foro-antico-en-vetrina-22d36ceb.jpg&w=1200&q=75", desc: "Beige en oud goud, bloemrijk en elegant." },
-  { slug: "tuscany-chic", name: "Tuscany Chic", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftuscany-chic-en-vetrina-3646f639.jpg&w=1200&q=75", desc: "Warm en verfijnd, en plein air." },
-  { slug: "gouden-uur", name: "Gouden Uur", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftipografico-moderno-en-vetrina-2c921489.jpg&w=1200&q=75", desc: "Warm avondlicht, romantisch en intiem." },
-  { slug: "de-geheime-tuin", name: "De Geheime Tuin", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fgiardino-segreto-en-vetrina-c0e0298d.jpg&w=1200&q=75", desc: "Rozenboog en Italiaanse tuin." },
-  { slug: "tratto-d-inchiostro", name: "Tratto d'Inchiostro", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftratto-inchiostro-en-vetrina-48f6d0e0.jpg&w=1200&q=75", desc: "Penlijnen op papier, één enkele inkt." },
-  { slug: "idillio", name: "Idillio", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fidillio-en-vetrina-4806113a.jpg&w=1200&q=75", desc: "Gouden strik en zwanen, alles licht." },
-  { slug: "romantisch-botanisch", name: "Romantisch Botanisch", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fbotanico-romantico-en-vetrina-5a476f93.jpg&w=1200&q=75", desc: "Bladeren en bloemen, delicaat." },
-  { slug: "strawberry-matcha", name: "Strawberry Matcha", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Fstrawberry-matcha-en-vetrina-4c490953.jpg&w=1200&q=75", desc: "Fris en speels, matcha en aardbei." },
-  { slug: "toile-de-jouy", name: "Toile de Jouy", img: "https://sponsalia.app/_next/image?url=%2Fassets%2Fmarketing%2Ftemplates%2Ftoile-bleu-en-vetrina-a0fc5d6a.jpg&w=1200&q=75", desc: "Toile in vier tinten op crème papier, zilveren of wit lint." },
-];
-
-const templateNames = [
-  "Bloom", "Volta Celeste", "Zomertuin", "Villa Aurora",
-  "Het Zwanenmeer", "Villa Cortina", "Minimale Couture", "Betoverd Bos",
-  "Riviera 70", "Italiaanse Aquarel", "Oro Antico", "Tuscany Chic",
-  "Gouden Uur", "De Geheime Tuin", "Tratto d'Inchiostro", "Idillio",
-  "Romantisch Botanisch", "Strawberry Matcha", "Toile de Jouy",
-];
-
-const steps = [
-  { n: "01", title: "Kies je stijl", desc: "Begin met het zorgvuldig vormgegeven sjabloon dat het best bij jullie past." },
-  { n: "02", title: "Personaliseer", desc: "Voeg namen, datum, programma en details toe, plus jullie eigen foto en jullie eigen lied. Een gratis livevoorbeeld voordat je betaalt." },
-  { n: "03", title: "Deel", desc: "Publiceer met één klik en deel de persoonlijke link van elke gast via WhatsApp, Instagram of waar je maar wilt — en iedereen opent hem automatisch in zijn eigen taal." },
-  { n: "04", title: "Alle antwoorden in één lijst", desc: "Aanwezigheid, intoleranties en menukeuzes werken zichzelf bij in je dashboard terwijl je gasten antwoorden." },
-  { n: "05", title: "De foto's van jullie gasten, in één album", desc: "Vanaf de trouwdag uploaden gasten hun foto's via de uitnodiging of de QR-code op de tafels. Jullie vinden ze allemaal in één album en downloaden ze in hoge kwaliteit: het zit bij jullie pakket inbegrepen." },
-];
-
-const fotoalbumFeatures = [
-  { title: "Via de uitnodiging of de QR-code op tafel", desc: "Eén tik op de uitnodiging, of de QR-code op de tafelkaartjes." },
-  { title: "Geen app, geen account", desc: "Gasten installeren niets en maken geen account aan." },
-  { title: "Geen foto's meer die in chats verdwijnen", desc: "De foto's die normaal op de telefoons van de gasten blijven, komen allemaal bij jullie terecht, schermvullend te bekijken." },
-  { title: "Alles downloaden met één klik", desc: "Eén foto of het hele album, in hoge kwaliteit." },
-];
-
-const plans = [
-  {
-    name: "Collectie", price: "89", desc: "eenmalige betaling",
-    features: [
-      "Kleuren, lettertypes en jullie foto: alles aanpasbaar",
-      "Een persoonlijke link per groep, of één open link voor iedereen",
-      "Alle beschikbare sjablonen",
-      "Gecentraliseerde RSVP's in realtime",
-      "Elke gast in zijn eigen taal",
-      "Je ziet de afgewerkte uitnodiging vóór de betaling, geen schets",
-      "Muziek: onze selectie of jullie eigen nummer",
-      "Tot 2 momenten (bijv. ceremonie en receptie), met andere gasten",
-      "📸 Fotoalbum van de gasten, ook met een QR-code op de tafels",
-    ],
-    subtext: "Je ziet hem af vóór je betaalt: je betaalt alleen om te publiceren.",
-    cta: "Maak je uitnodiging — gratis", highlight: true,
-  },
-  {
-    name: "Destination Wedding", price: "149", desc: "eenmalige betaling",
-    features: [
-      "Alles uit de Collectie",
-      "Onbeperkt dagen: welkomstdiner, bruiloft, brunch",
-      "Per dag andere gasten: ieder ziet alleen de zijne",
-      "'Waar te slapen': hotels met foto's en boekingslink",
-    ],
-    subtext: "Je ziet hem af vóór je betaalt: je betaalt alleen om te publiceren.",
-    cta: "Maak je uitnodiging — gratis", highlight: false,
-  },
-  {
-    name: "Op maat", price: "249", desc: "eenmalige betaling",
-    features: [
-      "Alles uit de andere pakketten",
-      "Een ontwerp speciaal voor jullie bruiloft gemaakt",
-      "We beginnen bij jullie ideeën: kleuren, bloemen, een tekening van de locatie",
-      "Vier correctierondes, klaar in 7 werkdagen",
-      "Meteen publiceren: we ontwerpen terwijl de uitnodiging al online staat",
-      "We begeleiden jullie van briefing tot oplevering",
-    ],
-    subtext: "Je ziet hem af vóór je betaalt: je betaalt alleen om te publiceren.",
-    cta: "Maak je uitnodiging — gratis", highlight: false,
-  },
-];
-
-const comparisonRows = [
-  { feature: "Alle sjablonen, kleuren en lettertypes", c: true, d: true, m: true },
-  { feature: "Elke gast in zijn eigen taal (16 talen)", c: true, d: true, m: true },
-  { feature: "Antwoorden van gasten in realtime", c: true, d: true, m: true },
-  { feature: "Fotoalbum van de gasten", c: true, d: true, m: true },
-  { feature: "Verschillende momenten voor verschillende gasten", c: "2", d: "onbeperkt", m: "onbeperkt" },
-  { feature: "Iedereen ziet alleen de momenten waarvoor hij is uitgenodigd", c: true, d: true, m: true },
-  { feature: "Pendeldienst en een eigen vraag in de RSVP", c: true, d: true, m: true },
-  { feature: "Waar te slapen: hotels met foto, link en kortingscode", c: false, d: true, m: true },
-  { feature: "Verblijf, aankomst en boekingsbevestiging in de RSVP", c: false, d: true, m: true },
-  { feature: "Aparte tafels en lijsten voor elk moment", c: false, d: true, m: true },
-  { feature: "Een sjabloon speciaal voor jullie getekend", c: false, d: false, m: true },
-];
-
-const voordelenLarge = [
-  { n: "01", iconType: "heart" as const, title: "Een uitnodiging die alleen van jullie is", desc: "Verfijnde typografie, smaakvolle kleurenpaletten, jullie eigen foto en jullie eigen lied: elk detail zegt \u201cdit is onze dag\u201d, geen standaardsjabloon. Een uitnodiging met karakter die jullie met trots delen.", dark: true },
-  { n: "02", iconType: "mail" as const, title: "Een uitnodiging op maat voor elke gast", desc: "Elke groep krijgt een eigen uitnodiging, met de namen er al in en een persoonlijke link. Stuur ze één voor één, of deel één open link en laat gasten zich zelf aanmelden. Hoe dan ook voelt iedereen zich deel van jullie dag.", dark: false },
-  { n: "03", iconType: "check" as const, title: "Alle antwoorden in één lijst", desc: "Aanwezigheid, intoleranties, menukeuzes en kinderen werken zichzelf bij terwijl je gasten antwoorden. Geen bevestigingen meer verspreid over berichten en telefoontjes: alles staat in één lijst, altijd actueel en klaar voor de cateraar.", dark: false },
-];
-
-const voordelenSmall = [
-  { iconType: "check" as const, title: "Elke gast in zijn eigen taal", desc: "Elke uitnodiging past zich automatisch aan de taal van wie hem opent aan." },
-  { iconType: "heart" as const, title: "100% digitaal en milieuvriendelijk", desc: "Geen papier, geen drukwerk, geen verzending." },
-  { iconType: "arrow" as const, title: "Klaar in enkele minuten", desc: "Kies een sjabloon, vul jullie gegevens in, publiceer met één klik." },
-  { iconType: "mail" as const, title: "Een envelop met lakzegel die opent bij aanraking", desc: "Elke uitnodiging komt in een envelop met lakzegel die met één aanraking opent — een klein moment van verwachting voordat de uitnodiging verschijnt." },
-  { iconType: "star" as const, title: "Tafels geregeld met AI", desc: "Typ of praat en de assistent plaatst alle gasten — families, allergieën, kinderen, wensen — in 2 minuten. Handmatige controle altijd aan." },
-];
-
-const gastenboekQuotes = [
-  { quote: "Ik kijk naar jullie vandaag en zie het licht in jullie ogen. Het leven vliegt voorbij, mijn lievelingen: houd elkaars hand vast, ook als je elkaar niet begrijpt. Ik zal er altijd voor jullie zijn. Ik houd meer van jullie dan woorden kunnen zeggen.", from: "Oma Elena" },
-  { quote: "We hebben je leren lopen door je handje vast te houden, en vandaag leg je die hand in de zijne. Je zult altijd ons kleine meisje blijven. We zijn zo trots op jullie beiden. Veel geluk met alle avonturen.", from: "Mama & Papa" },
-  { quote: "We hebben genoeg wilde avonden gehad samen, maar jullie liefde zien groeien is het mooiste van alles. We wensen jullie een leven vol lachen, reizen en dat prachtige warrige geluk. We houden van jullie!", from: "Lisa & Mark" },
-];
-
-const tafelFeatures = [
-  { title: "Jij praat, hij plaatst", desc: "Dicteer een opdracht of typ hem: \u201eplaats iedereen, het bruidspaar in het midden, families apart\u201c. Klaar." },
-  { title: "Hij snapt de echte voorwaarden", desc: "Familie die uit elkaar moet, exen, kinderen samen, gasten bij de uitgang: zeg het gewoon in woorden, hij regelt het." },
-  { title: "Tafelnamen met een thema", desc: "Italiaanse steden, films, reizen: de AI stelt themanamen voor die bij jullie stijl passen." },
-  { title: "Jij beslist altijd", desc: "De AI stelt voor, jij beslist: versleep met de hand wanneer je wilt, exporteer de dieet-PDF voor de keuken en de naamkaartjes." },
-];
-
-function SmallIcon({ iconType, className }: { iconType: string; className?: string }) {
-  switch (iconType) {
-    case "heart": return <Heart size={18} className={className} />;
-    case "check": return <Check size={18} className={className} />;
-    case "arrow": return <ArrowRight size={18} className={className} />;
-    case "mail": return <Mail size={18} className={className} />;
-    case "star": return <Star size={18} className={className} />;
-    default: return <Check size={18} className={className} />;
-  }
-}
-
-function LargeIcon({ iconType, size, className }: { iconType: string; size: number; className?: string }) {
-  switch (iconType) {
-    case "heart": return <Heart size={size} className={className} />;
-    case "mail": return <Mail size={size} className={className} />;
-    case "check": return <Check size={size} className={className} />;
-    default: return <Check size={size} className={className} />;
-  }
-}
-
-function CompCell({ val }: { val: boolean | string }) {
-  if (val === true) return <Check size={16} className="text-brand-700 mx-auto" />;
-  if (val === false) return <MinusIcon size={16} className="text-gray-300 mx-auto" />;
-  return <span className="font-sans text-xs text-text-muted">{val}</span>;
-}
-
 export default function HomePage() {
+  const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const handleImgError = (slug: string) => {
+    setImgErrors(prev => ({ ...prev, [slug]: true }));
+  };
+
+  const getImgSrc = (slug: string, originalFile: string) => {
+    if (imgErrors[slug]) {
+      // Fallback naar Sponsalia als lokaal niet beschikbaar
+      return `https://sponsalia.app/assets/marketing/templates/${originalFile}`;
+    }
+    return `/assets/templates/${slug}.jpg`;
+  };
+
+  // Map slug naar originele Sponsalia bestandsnaam voor fallback
+  const FALLBACK_FILES: Record<string, string> = {
+    "bloom": "bloom-en-vetrina-96e6b193.jpg",
+    "volta-celeste": "volta-celeste-en-vetrina-63b82e9f.jpg",
+    "zomertuin": "giardino-destate-en-vetrina-e4c79ec8.jpg",
+    "villa-aurora": "villa-aurora-en-vetrina-50b36ee0.jpg",
+    "het-zwanenmeer": "lago-dei-cigni-en-vetrina-6e0256ed.jpg",
+    "villa-cortina": "villa-cortina-en-vetrina-553a7717.jpg",
+    "minimale-couture": "couture-minimale-en-vetrina-93e7c6cd.jpg",
+    "betoverd-bos": "incanto-nel-bosco-en-vetrina-6c056d35.jpg",
+    "riviera-70": "riviera-70-en-vetrina-253c0193.jpg",
+    "italiaanse-aquarel": "acquerello-italia-en-vetrina-3869b8cc.jpg",
+    "oro-antico": "oro-antico-en-vetrina-22d36ceb.jpg",
+    "tuscany-chic": "tuscany-chic-en-vetrina-3646f639.jpg",
+    "gouden-uur": "tipografico-moderno-en-vetrina-2c921489.jpg",
+    "de-geheime-tuin": "giardino-segreto-en-vetrina-c0e0298d.jpg",
+    "tratto-d-inchiostro": "tratto-inchiostro-en-vetrina-48f6d0e0.jpg",
+    "idillio": "idillio-en-vetrina-4806113a.jpg",
+    "romantisch-botanisch": "botanico-romantico-en-vetrina-5a476f93.jpg",
+    "strawberry-matcha": "strawberry-matcha-en-vetrina-4c490953.jpg",
+    "toile-de-jouy": "toile-bleu-en-vetrina-a0fc5d6a.jpg",
+  };
+
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="font-sans text-[16px] font-semibold tracking-[0.2em] uppercase text-[#16161D]">Casa Nomada</Link>
-          <nav className="hidden md:flex items-center gap-8">
-            {[{ label: "Sjablonen", href: "#sjablonen" }, { label: "Hoe het werkt", href: "#werkwijze" }, { label: "Voordelen", href: "#voordelen" }, { label: "Prijzen", href: "#prijzen" }, { label: "FAQ", href: "#faq" }].map((link) => (
-              <Link key={link.label} href={link.href} className="text-[13px] text-text-muted hover:text-[#16161D] transition-colors font-sans">{link.label}</Link>
+      <Nav />
+
+      {/* HERO */}
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", background: "linear-gradient(160deg, #fdf6f4 0%, #f5ede8 60%, #edddd5 100%)", padding: "80px 24px 60px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "1fr 420px", gap: 60, alignItems: "center" }}>
+          <div>
+            <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: "#8B2635", marginBottom: 16 }}>Digitale trouwuitnodigingen</p>
+            <h1 style={{ fontFamily: "serif", fontSize: "clamp(2.4rem, 5vw, 3.8rem)", color: "#16161D", lineHeight: 1.1, marginBottom: 20 }}>
+              Een uitnodiging die <em style={{ fontStyle: "italic", color: "#8B2635" }}>aanvoelt</em> als een moment
+            </h1>
+            <p style={{ fontFamily: "sans-serif", fontSize: 17, color: "#5a5550", lineHeight: 1.75, marginBottom: 32, maxWidth: 480 }}>
+              Geen PDF-bijlage. Geen WhatsApp-bericht. Een digitale uitnodiging die opengaat, verwondert en bijblijft — voor elk stel, elk verhaal.
+            </p>
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <Link href="/register" style={{ background: "#8B2635", color: "white", borderRadius: 999, padding: "14px 28px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, textDecoration: "none", letterSpacing: "0.02em" }}>
+                Gratis beginnen
+              </Link>
+              <Link href="/templates" style={{ background: "white", color: "#16161D", borderRadius: 999, padding: "14px 28px", fontFamily: "sans-serif", fontSize: 14, border: "1.5px solid #e0cbc3", textDecoration: "none" }}>
+                Bekijk sjablonen
+              </Link>
+            </div>
+            <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginTop: 16 }}>✓ Eenmalig €89 &nbsp;·&nbsp; ✓ Levenslang online &nbsp;·&nbsp; ✓ Geen abonnement</p>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <HeroPhone />
+          </div>
+        </div>
+      </section>
+
+      {/* HOE HET WERKT */}
+      <section style={{ padding: "80px 24px", background: "white" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B2635", textAlign: "center", marginBottom: 10 }}>Hoe het werkt</p>
+          <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,3vw,2.6rem)", color: "#16161D", textAlign: "center", marginBottom: 48 }}>Van idee tot uitnodiging in een middag</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32 }}>
+            {[
+              { n: "01", title: "Kies je sjabloon", desc: "19 handgemaakte ontwerpen. Van aquarel tot minimalistisch — ieder met een eigen opening." },
+              { n: "02", title: "Vul je gegevens in", desc: "Namen, datum, locatie en een persoonlijk bericht. Onze editor begeleidt je stap voor stap." },
+              { n: "03", title: "Nodig gasten uit", desc: "Elk koppel krijgt een unieke link. Of stuur één link naar iedereen — jij kiest." },
+              { n: "04", title: "Volg het in real time", desc: "Zie wie heeft geopend, wie bevestigt en wie foto's upload. Alles in je dashboard." },
+            ].map(({ n, title, desc }) => (
+              <div key={n}>
+                <p style={{ fontFamily: "serif", fontSize: 32, color: "#f0ddd7", fontWeight: 700, marginBottom: 8 }}>{n}</p>
+                <p style={{ fontFamily: "sans-serif", fontSize: 15, fontWeight: 600, color: "#16161D", marginBottom: 6 }}>{title}</p>
+                <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", lineHeight: 1.65 }}>{desc}</p>
+              </div>
             ))}
-          </nav>
-          <div className="hidden md:flex items-center gap-4">
-            <Link href="/dashboard" className="text-[13px] text-text-muted hover:text-[#16161D] transition-colors font-sans">Inloggen</Link>
-            <Link href="/register" className="text-[13px] bg-brand-800 text-white px-5 py-2.5 rounded-full hover:bg-brand-700 transition-colors font-sans tracking-[0.1em] uppercase">Maak je uitnodiging</Link>
           </div>
-          <button className="md:hidden p-2 text-[#16161D]" aria-label="Menu"><LayoutGrid size={20} /></button>
         </div>
-      </header>
+      </section>
 
-      <main className="pt-16">
+      {/* TEMPLATES GRID */}
+      <section style={{ padding: "80px 24px", background: "#faf6f3" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B2635", textAlign: "center", marginBottom: 10 }}>Sjablonen</p>
+          <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,3vw,2.6rem)", color: "#16161D", textAlign: "center", marginBottom: 8 }}>19 ontwerpen, elk met eigen karakter</h2>
+          <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88", textAlign: "center", marginBottom: 40 }}>Van een aquarelroos tot fluwelen gordijnen — elk sjabloon heeft zijn eigen openingsanimatie.</p>
 
-        {/* HERO */}
-        <section className="bg-white">
-          <div className="max-w-7xl mx-auto px-6 py-20">
-            <div className="grid lg:grid-cols-[50%_50%] gap-12 lg:gap-16 items-center">
-              <div className="animate-fade-up">
-                <div className="inline-flex items-center gap-2 bg-cream border border-gray-200 rounded-full px-4 py-1.5 mb-8">
-                  <Heart size={12} className="text-brand-800" />
-                  <span className="text-[11px] tracking-[0.2em] uppercase text-brand-800 font-sans font-medium">Emotie vanaf het eerste moment</span>
-                </div>
-                <h1 className="font-serif text-[2.75rem] md:text-[3.6rem] lg:text-[4.8rem] font-semibold leading-[1.07] tracking-[-0.02em] text-[#16161D] max-w-[660px] mb-6">
-                  Jullie mooiste uitnodiging,{" "}<span className="text-brand-800">jullie eenvoudigste reacties.</span>
-                </h1>
-                <h2 className="font-serif text-[1.45rem] font-medium text-[#16161D]/70 mb-6">Digitale trouwkaarten</h2>
-                <div className="flex flex-wrap gap-2 mb-8">
-                  {["Jullie foto\u2019s, jullie kleuren, jullie muziek", "Een persoonlijke link voor elke gast", "Fotoalbum van jullie gasten", "Elke gast leest in de eigen taal", "Reacties komen binnen in jullie dashboard", "Deel de tafels in met hulp van onze AI-agent"].map((f) => (
-                    <span key={f} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-[13px] font-sans text-text-muted">
-                      <Check size={13} className="text-brand-700" />{f}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                  <Link href="/templates" className="inline-flex items-center justify-center gap-2 bg-brand-800 text-white rounded-full px-7 py-3.5 text-[15px] font-sans font-medium hover:bg-brand-700 transition-colors">
-                    Maak jullie uitnodiging &mdash; gratis<ArrowRight size={16} />
-                  </Link>
-                  <Link href="#sjablonen" className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-[#16161D] rounded-full px-7 py-3.5 text-[15px] font-sans font-medium hover:border-brand-800 hover:text-brand-800 transition-colors">Bekijk de sjablonen</Link>
-                </div>
-                <p className="text-[13.6px] text-[#16161D]/[0.66] font-sans mb-2">Gratis voorbeeld &middot; Veilige betaling &middot; &euro;89 om te publiceren</p>
-                <p className="text-[13px] text-[#16161D]/60 font-sans">Heb je al een account?{" "}<Link href="/dashboard" className="text-brand-700 underline underline-offset-2 hover:text-brand-800 transition-colors">Inloggen</Link></p>
-              </div>
-              <div className="animate-fade-up animate-fade-up-delay-1 flex items-center justify-center">
-                <HeroPhone />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FOTOALBUM */}
-        <section className="bg-cream py-[120px]">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-10">
-              <span className="inline-flex items-center gap-2 bg-brand-800 text-white text-[11px] font-sans tracking-[0.15em] uppercase rounded-full px-4 py-1.5">
-                <Camera size={12} /> Nieuw &middot; Inbegrepen in jullie pakket
-              </span>
-            </div>
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="font-serif text-[2.8rem] text-[#16161D] mb-5 leading-tight font-semibold">Alle foto&apos;s van jullie gasten, in één album.</h2>
-                <p className="font-sans text-text-muted leading-relaxed mb-8">Op de trouwdag uploadt elke gast de foto&apos;s die hij heeft gemaakt, via de uitnodiging of de QR-code op de tafels. Jullie vinden ze allemaal op één plek terug, klaar om te downloaden.</p>
-                <ul className="space-y-6 mb-8">
-                  {fotoalbumFeatures.map((f, i) => (
-                    <li key={i} className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-white border border-gray-200 shrink-0 flex items-center justify-center"><Camera size={16} className="text-brand-800" /></div>
-                      <div>
-                        <h4 className="font-serif text-[15px] font-semibold text-[#16161D] mb-1">{f.title}</h4>
-                        <p className="font-sans text-sm text-text-muted leading-relaxed">{f.desc}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <p className="font-sans text-[13px] text-text-muted italic mb-6">Zonder meerprijs inbegrepen in elk pakket. Het gaat aan zodra jullie de uitnodiging publiceren.</p>
-                <Link href="/templates" className="inline-flex items-center gap-2 bg-brand-800 text-white rounded-full px-7 py-3.5 font-sans text-[15px] hover:bg-brand-700 transition-colors">Maak jullie uitnodiging<ArrowRight size={15} /></Link>
-              </div>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-8">
-                  <div className="grid grid-cols-2 gap-3">
-                    {["https://images.unsplash.com/photo-1529636444744-adffc9135a5e?w=400&q=80","https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80","https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400&q=80","https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&q=80"].map((src, i) => (
-                      <div key={i} className="rounded-xl overflow-hidden aspect-square bg-cream">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="Gastenfoto" className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <p className="font-sans text-xs text-text-muted">42 foto&apos;s &middot; 14 sep 2026</p>
-                    <div className="inline-flex items-center gap-1.5 bg-brand-800 text-white text-xs font-sans px-4 py-2 rounded-full"><ArrowRight size={12} /> Alles downloaden</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* TEMPLATES */}
-        <section id="sjablonen" className="bg-white py-[120px]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <SectionLabel>De sjablonen</SectionLabel>
-              <h2 className="font-serif text-[2.8rem] font-semibold text-[#16161D] mb-4">Kies je stijl</h2>
-              <p className="font-sans text-text-muted max-w-lg mx-auto leading-relaxed">Zorgvuldig vormgegeven sjablonen, geoptimaliseerd voor de smartphone. Tik op een sjabloon om de live preview met voorbeeldgegevens te openen.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {templates.map((t, i) => (
-                <Link key={i} href={`/templates/${t.slug}`} className="card-hover group cursor-pointer block">
-                  <div className="rounded-2xl bg-cream overflow-hidden border border-gray-100">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+            {templates.slice(0, 9).map(t => (
+              <Link key={t.slug} href={`/templates/${t.slug}`} style={{ textDecoration: "none", display: "block" }}
+                onMouseEnter={() => setHoveredTemplate(t.slug)}
+                onMouseLeave={() => setHoveredTemplate(null)}>
+                <div style={{ borderRadius: 16, overflow: "hidden", border: "1.5px solid", borderColor: hoveredTemplate === t.slug ? "#8B2635" : "#ece8e4", background: "white", transition: "border-color 0.2s, transform 0.2s", transform: hoveredTemplate === t.slug ? "translateY(-3px)" : "none", boxShadow: hoveredTemplate === t.slug ? "0 12px 32px rgba(139,38,53,0.12)" : "none" }}>
+                  <div style={{ aspectRatio: "3/4", position: "relative", background: "#f5ede8" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={t.img} alt={t.name} className="w-full h-auto object-cover" loading={i < 6 ? "eager" : "lazy"} />
+                    <img
+                      src={imgErrors[t.slug] ? `https://sponsalia.app/assets/marketing/templates/${FALLBACK_FILES[t.slug]}` : `/assets/templates/${t.slug}.jpg`}
+                      alt={t.name}
+                      onError={() => handleImgError(t.slug)}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    />
                   </div>
-                  <div className="mt-3 px-1 text-center">
-                    <h3 className="font-serif text-base text-[#16161D] group-hover:text-brand-800 transition-colors">{t.name}</h3>
-                    <p className="font-sans text-xs text-text-muted mt-0.5">{t.desc}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <div className="text-center mt-10">
-              <p className="font-sans text-[13px] text-text-muted mb-4">&euro;89 &middot; Eenmalige betaling, geen abonnement</p>
-              <Link href="/templates" className="inline-flex items-center gap-2 bg-brand-800 text-white rounded-full px-7 py-3.5 font-sans text-[15px] hover:bg-brand-700 transition-colors">Maak jullie uitnodiging &mdash; gratis<ArrowRight size={15} /></Link>
-            </div>
-          </div>
-        </section>
-
-        {/* HOE HET WERKT */}
-        <section id="werkwijze" className="bg-cream py-[120px]">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <SectionLabel>Hoe het werkt</SectionLabel>
-              <h2 className="font-serif text-[2.8rem] font-semibold text-[#16161D]">Van sjabloon naar RSVP, in een paar stappen</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
-              {steps.map((s, i) => (
-                <div key={i} className="text-center">
-                  <div className="flex justify-center mb-6">
-                    <div className="w-[3.5rem] h-[3.5rem] rounded-full bg-brand-800 flex items-center justify-center">
-                      <span className="font-serif text-lg text-white">{s.n}</span>
-                    </div>
-                  </div>
-                  <h3 className="font-serif text-[1rem] font-semibold text-[#16161D] mb-2">{s.title}</h3>
-                  <p className="font-sans text-[13px] text-text-muted leading-relaxed">{s.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* PRICING */}
-        <section id="prijzen" className="bg-white py-[120px]">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <SectionLabel>Prijzen</SectionLabel>
-              <h2 className="font-serif text-[2.8rem] font-semibold text-[#16161D] mb-4">Drie pakketten, één betaling</h2>
-              <p className="font-sans text-text-muted max-w-lg mx-auto leading-relaxed">Maak jullie uitnodiging en bekijk hem helemaal af, gratis. Je betaalt &euro;89 om hem te publiceren en zichtbaar te maken voor jullie gasten.</p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6 mb-16">
-              {plans.map((p, i) => (
-                <div key={i} className="rounded-2xl bg-white border border-gray-200 p-8 flex flex-col relative">
-                  {p.highlight && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-[10px] font-sans tracking-[0.15em] uppercase bg-brand-800 text-white rounded-full px-4 py-1.5 shadow-sm">
-                      <Star size={10} /> Aanbevolen
-                    </span>
-                  )}
-                  <p className="font-serif text-xl text-[#16161D] mb-4 text-center">{p.name}</p>
-                  <div className="text-center mb-1"><span className="font-serif text-[3.5rem] text-[#16161D] leading-none">&euro;{p.price}</span></div>
-                  <p className="font-sans text-[11px] tracking-[0.15em] uppercase text-text-muted text-center mb-8">{p.desc}</p>
-                  <div className="border-t border-gray-100 mb-8" />
-                  <ul className="space-y-3 mb-4 flex-1">
-                    {p.features.map((f, fi) => (
-                      <li key={fi} className="flex items-start gap-2.5 font-sans text-sm text-text-muted leading-snug">
-                        <Check size={16} className="mt-0.5 shrink-0 text-brand-700" />{f}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="font-sans text-[11px] text-text-muted italic mb-6">{p.subtext}</p>
-                  <Link href="/templates" className="block text-center rounded-full py-3.5 font-sans text-sm font-medium bg-brand-800 text-white hover:bg-brand-700 transition-colors">{p.cta}</Link>
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 mb-16">
-              <span className="font-sans text-xs text-text-muted flex items-center gap-1.5"><Check size={13} className="text-brand-700" />Eén betaling, nooit een abonnement</span>
-              <span className="font-sans text-xs text-text-muted flex items-center gap-1.5"><Check size={13} className="text-brand-700" />Eén prijs, geen verlengingen</span>
-            </div>
-            <div className="overflow-x-auto">
-              <p className="font-sans text-xs text-text-muted italic mb-4 text-center">Wat elk pakket bevat</p>
-              <table className="comparison-table w-full text-left">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="font-sans text-xs text-text-muted font-normal">Wat elk pakket bevat</th>
-                    <th className="font-serif text-sm text-[#16161D]">Collectie<br /><span className="font-sans text-xs text-text-muted font-normal">&euro;89</span></th>
-                    <th className="font-serif text-sm text-[#16161D]">Destination<br /><span className="font-sans text-xs text-text-muted font-normal">&euro;149</span></th>
-                    <th className="font-serif text-sm text-[#16161D]">Op maat<br /><span className="font-sans text-xs text-text-muted font-normal">&euro;249</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisonRows.map((row, i) => (
-                    <tr key={i}>
-                      <td className="font-sans text-sm text-text-muted">{row.feature}</td>
-                      <td className="text-center"><CompCell val={row.c} /></td>
-                      <td className="text-center"><CompCell val={row.d} /></td>
-                      <td className="text-center"><CompCell val={row.m} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* VOORDELEN */}
-        <section id="voordelen" className="bg-cream py-[120px]">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <SectionLabel>Voordelen</SectionLabel>
-              <h2 className="font-serif text-[2.8rem] font-semibold text-[#16161D]">Uitnodigingen die een andere indruk maken</h2>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
-              {voordelenLarge.map((item, i) => (
-                <div key={i} className={"rounded-2xl p-8 flex flex-col " + (item.dark ? "bg-brand-800" : "bg-white border border-gray-200")}>
-                  <div className="flex items-start justify-between mb-6">
-                    <div className={"w-12 h-12 rounded-full flex items-center justify-center " + (item.dark ? "bg-white/15" : "bg-cream")}>
-                      <LargeIcon iconType={item.iconType} size={20} className={item.dark ? "text-white" : "text-brand-800"} />
-                    </div>
-                    <span className={"font-serif text-[2.5rem] leading-none " + (item.dark ? "text-white/20" : "text-gray-200")}>{item.n}</span>
-                  </div>
-                  <h3 className={"font-serif text-[1.25rem] font-semibold mb-3 " + (item.dark ? "text-white" : "text-[#16161D]")}>{item.title}</h3>
-                  <p className={"font-sans text-[14px] leading-relaxed " + (item.dark ? "text-white/75" : "text-text-muted")}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {voordelenSmall.map((f, i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-cream shrink-0 flex items-center justify-center"><SmallIcon iconType={f.iconType} className="text-brand-800" /></div>
-                  <div>
-                    <h4 className="font-serif text-[15px] font-semibold text-[#16161D] mb-1">{f.title}</h4>
-                    <p className="font-sans text-xs text-text-muted leading-relaxed">{f.desc}</p>
+                  <div style={{ padding: "12px 14px" }}>
+                    <p style={{ fontFamily: "serif", fontSize: 16, color: "#16161D", marginBottom: 2 }}>{t.name}</p>
+                    <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", lineHeight: 1.4 }}>{t.tagline}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </Link>
+            ))}
           </div>
-        </section>
 
-        {/* GASTENBOEK */}
-        <section className="bg-white py-[120px]">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-6"><SectionLabel>Een herinnering voor altijd</SectionLabel></div>
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="font-serif text-[2.8rem] text-[#16161D] mb-5 leading-tight font-semibold">De woorden van je dierbaren,<br />voor altijd bewaard</h2>
-                <p className="font-sans text-text-muted leading-relaxed mb-8">Bij elke bevestiging kunnen de mensen die van je houden een bericht achterlaten. Ze komen allemaal op één plek samen &mdash; geen berichten meer die verloren gaan tussen chats en kaartjes &mdash; en wanneer je maar wilt, exporteer je ze naar een elegant PDF-boekje. De woorden van oma, van je ouders, van je vrienden van altijd: een herinnering om te herlezen en je leven lang te koesteren.</p>
-                <ul className="space-y-3 mb-8">
-                  {["Elke gast laat zijn bericht achter bij de RSVP", "Alle gedachten verzameld in je dashboard", "Exporteren naar een PDF om voor altijd te bewaren"].map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 font-sans text-sm text-text-muted"><Check size={15} className="text-brand-700 shrink-0" />{f}</li>
-                  ))}
-                </ul>
-                <Link href="/templates" className="inline-flex items-center gap-2 bg-brand-800 text-white rounded-full px-7 py-3.5 font-sans text-[15px] hover:bg-brand-700 transition-colors">Maak je uitnodiging en begin ze te verzamelen &rarr;</Link>
-              </div>
-              <div className="bg-cream rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10">
-                <div className="text-center mb-8">
-                  <h3 className="font-serif text-2xl text-brand-800 italic mb-1">Gedachten voor het bruidspaar</h3>
-                  <p className="font-sans text-xs text-text-muted">Anna &amp; Thomas</p>
-                  <p className="font-sans text-[10px] tracking-[0.1em] uppercase text-text-muted/60 mt-1">14 september 2026</p>
-                  <div className="w-12 border-t border-brand-800/20 mx-auto mt-4" />
-                </div>
-                <div className="space-y-6">
-                  {gastenboekQuotes.map((w, i) => (
-                    <div key={i} className="bg-white rounded-xl p-5 border border-gray-100">
-                      <p className="font-serif text-sm text-[#16161D]/80 italic leading-relaxed mb-3">&ldquo;{w.quote}&rdquo;</p>
-                      <p className="font-sans text-xs text-text-muted text-right">&mdash; van {w.from}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-center font-sans text-[10px] tracking-[0.15em] uppercase text-text-muted/40 mt-6">CASA NOMADA</p>
-              </div>
-            </div>
+          <div style={{ textAlign: "center", marginTop: 32 }}>
+            <Link href="/templates" style={{ display: "inline-block", background: "white", color: "#8B2635", border: "1.5px solid #8B2635", borderRadius: 999, padding: "12px 28px", fontFamily: "sans-serif", fontSize: 14, textDecoration: "none" }}>
+              Alle 19 sjablonen bekijken →
+            </Link>
           </div>
-        </section>
-
-        {/* AI TAFELINDELING */}
-        <section className="bg-cream py-[120px]">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-6"><SectionLabel>Nieuw &middot; AI-tafelindeling</SectionLabel></div>
-            <div className="grid md:grid-cols-2 gap-16 items-start">
-              <div>
-                <h2 className="font-serif text-[2.8rem] text-[#16161D] mb-5 leading-tight font-semibold">Organiseer de tafels met AI. In 2 minuten, niet 2000 klikken.</h2>
-                <p className="font-sans text-text-muted leading-relaxed mb-10">Typ of praat en de assistent plaatst elke gast met oog voor families, kanten, allergie&euml;n, kinderen en wie uit elkaar moet blijven. Jij houdt altijd de controle.</p>
-                <div className="space-y-8">
-                  {tafelFeatures.map((f, i) => (
-                    <div key={i}>
-                      <h4 className="font-serif text-lg text-[#16161D] mb-1.5">{f.title}</h4>
-                      <p className="font-sans text-sm text-text-muted leading-relaxed">{f.desc}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="font-sans text-[11px] text-text-muted/60 mt-8 italic">Gastgegevens blijven veilig: er worden geen persoonsgegevens gebruikt om modellen te trainen.</p>
-                <Link href="/templates" className="mt-8 inline-flex items-center gap-2 bg-brand-800 text-white rounded-full px-7 py-3.5 font-sans text-[15px] hover:bg-brand-700 transition-colors">Probeer de AI-assistent<ArrowRight size={15} /></Link>
-              </div>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-8">
-                  <div className="relative w-full aspect-square max-w-[400px] mx-auto">
-                    <div className="absolute top-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center">
-                      <p className="font-sans text-[10px] text-text-muted mb-1">Tafel Bruidspaar</p>
-                      <div className="w-14 h-14 rounded-full bg-brand-800/10 border-2 border-brand-800 flex items-center justify-center"><Heart size={16} className="text-brand-800" /></div>
-                    </div>
-                    <div className="absolute top-[35%] left-[15%] flex flex-col items-center">
-                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 1</p>
-                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center"><span className="font-sans text-xs text-purple-700">6/6</span></div>
-                    </div>
-                    <div className="absolute top-[35%] right-[15%] flex flex-col items-center">
-                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 2</p>
-                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center"><span className="font-sans text-xs text-purple-700">6/6</span></div>
-                    </div>
-                    <div className="absolute top-[62%] left-[8%] flex flex-col items-center">
-                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 3</p>
-                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center"><span className="font-sans text-xs text-purple-700">5/6</span></div>
-                    </div>
-                    <div className="absolute top-[62%] right-[8%] flex flex-col items-center">
-                      <p className="font-sans text-[9px] text-text-muted mb-1">Tafel 4</p>
-                      <div className="w-14 h-14 rounded-full bg-purple-100 border border-purple-300 flex items-center justify-center"><span className="font-sans text-xs text-purple-700">6/6</span></div>
-                    </div>
-                    <div className="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center">
-                      <p className="font-sans text-[9px] text-text-muted mb-1">Kindertafel</p>
-                      <div className="w-12 h-12 rounded-lg bg-pink-50 border border-pink-200 flex items-center justify-center"><span className="font-sans text-[10px] text-pink-600">3/3</span></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="border-t border-gray-100 px-6 py-4 bg-cream">
-                  <p className="font-sans text-[11px] text-brand-700 mb-2">&#10024; Klaar: gasten verdeeld over 6 tafels. Bruidspaar en kinderen aan hun eigen tafels.</p>
-                  <div className="flex gap-2">
-                    <div className="flex-1 bg-white rounded-full px-4 py-2.5 text-xs font-sans text-text-muted/50">Plaats iedereen, het bruidspaar in het midden, families apart</div>
-                    <div className="w-9 h-9 rounded-full bg-brand-800 flex items-center justify-center shrink-0"><ArrowRight size={14} className="text-white" /></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section id="faq" className="bg-white py-[120px]">
-          <div className="max-w-2xl mx-auto px-6">
-            <div className="text-center mb-14">
-              <SectionLabel>Voordat je begint</SectionLabel>
-              <h2 className="font-serif text-[2.8rem] font-semibold text-[#16161D]">Veelgestelde vragen</h2>
-            </div>
-            <FAQAccordion />
-          </div>
-        </section>
-
-        {/* FINAL CTA */}
-        <section className="bg-brand-800 py-[120px]">
-          <div className="max-w-2xl mx-auto px-6 text-center">
-            <h2 className="font-serif text-[2.8rem] font-semibold text-white mb-5 leading-tight italic">Klaar om jullie uitnodiging te maken?</h2>
-            <p className="font-sans text-white/70 text-lg mb-10 leading-relaxed">Probeer het gratis. Jullie betalen pas wanneer jullie overtuigd zijn.</p>
-            <Link href="/templates" className="inline-flex items-center gap-2 bg-white text-brand-800 rounded-full px-10 py-4 font-sans text-[15px] font-medium hover:bg-cream transition-colors">Maak jullie uitnodiging &mdash; gratis<ArrowRight size={16} /></Link>
-          </div>
-        </section>
-
-        {/* FOOTER */}
-        <footer className="bg-[#16161D] py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-4 gap-10 mb-12">
-              <div className="md:col-span-2">
-                <p className="font-sans text-[16px] font-semibold tracking-[0.2em] uppercase text-white mb-3">Casa Nomada</p>
-                <p className="font-sans text-sm text-white/50 leading-relaxed max-w-sm mb-5">Digitale trouwkaarten, elegant en gepersonaliseerd. Gratis voorbeeld, publiceren met een klik.</p>
-                <Link href="/templates" className="inline-flex items-center gap-1.5 font-sans text-sm text-white/70 hover:text-white transition-colors">Maak je trouwkaart &rarr;</Link>
-              </div>
-              <div>
-                <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-white/30 mb-4">Product</p>
-                <ul className="space-y-2.5">
-                  {[{ label: "Sjablonen", href: "#sjablonen" }, { label: "Hoe het werkt", href: "#werkwijze" }, { label: "Voordelen", href: "#voordelen" }, { label: "Prijzen", href: "#prijzen" }, { label: "FAQ", href: "#faq" }].map((l) => (
-                    <li key={l.label}><Link href={l.href} className="font-sans text-sm text-white/50 hover:text-white transition-colors">{l.label}</Link></li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-white/30 mb-4">Juridisch</p>
-                <ul className="space-y-2.5">
-                  {["Servicevoorwaarden", "Privacybeleid", "Cookiebeleid", "Contact"].map((l) => (
-                    <li key={l}><Link href="#" className="font-sans text-sm text-white/50 hover:text-white transition-colors">{l}</Link></li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-3">
-              <p className="font-sans text-xs text-white/30">&copy; 2025 Casa Nomada Digital. Alle rechten voorbehouden.</p>
-              <p className="font-sans text-xs text-white/30">Veilig betalen &middot; De afgewerkte uitnodiging voor de betaling</p>
-            </div>
-          </div>
-        </footer>
-      </main>
-
-      {/* STICKY BOTTOM BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-gray-100 px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="font-serif text-2xl text-[#16161D]">&euro;89</span>
-            <span className="font-sans text-[13px] text-text-muted hidden sm:inline">Eenmalige betaling, geen abonnement</span>
-          </div>
-          <Link href="/templates" className="inline-flex items-center gap-2 bg-brand-800 text-white rounded-full px-6 py-2.5 font-sans text-[13px] font-medium hover:bg-brand-700 transition-colors tracking-[0.05em] uppercase">
-            Maak je uitnodiging<ArrowRight size={14} />
-          </Link>
         </div>
-      </div>
+      </section>
+
+      {/* PRIJS */}
+      <section style={{ padding: "80px 24px", background: "white" }}>
+        <div style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B2635", marginBottom: 10 }}>Prijs</p>
+          <h2 style={{ fontFamily: "serif", fontSize: "clamp(1.8rem,3vw,2.6rem)", color: "#16161D", marginBottom: 8 }}>Eén prijs. Alles inbegrepen.</h2>
+          <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88", marginBottom: 40 }}>Geen abonnement. Geen verborgen kosten. Je betaalt één keer en de uitnodiging blijft voor altijd online.</p>
+          <div style={{ background: "#fdf6f4", borderRadius: 24, border: "1px solid #f0ddd7", padding: "36px 32px" }}>
+            <p style={{ fontFamily: "serif", fontSize: 56, color: "#8B2635", marginBottom: 4 }}>€89</p>
+            <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", marginBottom: 24 }}>Eenmalig, inclusief BTW</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginBottom: 28 }}>
+              {["Levenslang online uitnodiging", "Onbeperkt gasten uitnodigen", "RSVP-bevestigingen", "Fotoalbum voor gasten", "Gastenboek", "Programma & locatieinfo", "QR codes", "Persoonlijke ondersteuning"].map(f => (
+                <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ color: "#8B2635", fontSize: 14 }}>✓</span>
+                  <span style={{ fontFamily: "sans-serif", fontSize: 13, color: "#5a5550" }}>{f}</span>
+                </div>
+              ))}
+            </div>
+            <Link href="/register" style={{ display: "block", background: "#8B2635", color: "white", borderRadius: 999, padding: "14px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, textDecoration: "none", textAlign: "center" }}>
+              Gratis beginnen
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </>
   );
 }

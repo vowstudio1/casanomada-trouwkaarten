@@ -1,304 +1,99 @@
+"use client";
 import Link from "next/link";
+import { useState } from "react";
+import { templates } from "@/lib/templates";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { templates } from "@/lib/templates";
 
-export const metadata = {
-  title: "Sjablonen | Casa Nomada",
-  description:
-    "Ontdek 19 prachtige sjablonen voor digitale trouwuitnodigingen. Van romantisch botanisch tot minimale couture — vind jouw stijl.",
+const FALLBACK: Record<string, string> = {
+  "bloom": "bloom-en-vetrina-96e6b193.jpg",
+  "volta-celeste": "volta-celeste-en-vetrina-63b82e9f.jpg",
+  "zomertuin": "giardino-destate-en-vetrina-e4c79ec8.jpg",
+  "villa-aurora": "villa-aurora-en-vetrina-50b36ee0.jpg",
+  "het-zwanenmeer": "lago-dei-cigni-en-vetrina-6e0256ed.jpg",
+  "villa-cortina": "villa-cortina-en-vetrina-553a7717.jpg",
+  "minimale-couture": "couture-minimale-en-vetrina-93e7c6cd.jpg",
+  "betoverd-bos": "incanto-nel-bosco-en-vetrina-6c056d35.jpg",
+  "riviera-70": "riviera-70-en-vetrina-253c0193.jpg",
+  "italiaanse-aquarel": "acquerello-italia-en-vetrina-3869b8cc.jpg",
+  "oro-antico": "oro-antico-en-vetrina-22d36ceb.jpg",
+  "tuscany-chic": "tuscany-chic-en-vetrina-3646f639.jpg",
+  "gouden-uur": "tipografico-moderno-en-vetrina-2c921489.jpg",
+  "de-geheime-tuin": "giardino-segreto-en-vetrina-c0e0298d.jpg",
+  "tratto-d-inchiostro": "tratto-inchiostro-en-vetrina-48f6d0e0.jpg",
+  "idillio": "idillio-en-vetrina-4806113a.jpg",
+  "romantisch-botanisch": "botanico-romantico-en-vetrina-5a476f93.jpg",
+  "strawberry-matcha": "strawberry-matcha-en-vetrina-4c490953.jpg",
+  "toile-de-jouy": "toile-bleu-en-vetrina-a0fc5d6a.jpg",
+};
+
+const OPENING_LABELS: Record<string, string> = {
+  bow: "🎀 Strik-opening",
+  trifold: "📄 Trifold",
+  curtain: "🎭 Gordijn",
+  wave: "🌊 Golf",
+  floral: "🌸 Bloem",
+  fold: "✉️ Vouw",
 };
 
 export default function TemplatesPage() {
+  const [filter, setFilter] = useState<string>("alle");
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const openingStyles = ["alle", ...Array.from(new Set(templates.map(t => t.openingStyle)))];
+
+  const filtered = filter === "alle" ? templates : templates.filter(t => t.openingStyle === filter);
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#f9f5f1",
-      }}
-    >
+    <>
       <Nav />
-
-      <style>{`
-        .tpl-card {
-          background-color: #FFFFFF;
-          border-radius: 1rem;
-          overflow: hidden;
-          border: 1px solid #E8E6E3;
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
-          cursor: pointer;
-        }
-        .tpl-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 20px 48px rgba(89,38,47,0.10);
-        }
-      `}</style>
-
-      <main style={{ flex: 1 }}>
+      <div style={{ background: "#faf6f3", minHeight: "100vh", paddingTop: 60 }}>
         {/* Header */}
-        <section
-          style={{
-            backgroundColor: "#FFFFFF",
-            borderBottom: "1px solid #E8E6E3",
-            padding: "4rem 1.5rem 3rem",
-            textAlign: "center",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "0.6875rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "#8B2635",
-              fontFamily: "system-ui, sans-serif",
-              fontWeight: 600,
-              marginBottom: "1rem",
-            }}
-          >
-            19 ontwerpen
-          </p>
-          <h1
-            style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              fontWeight: 600,
-              color: "#16161D",
-              marginBottom: "1.25rem",
-              lineHeight: 1.1,
-            }}
-          >
-            Kies je stijl
-          </h1>
-          <p
-            style={{
-              fontSize: "1.0625rem",
-              color: "#6B6B76",
-              maxWidth: "34rem",
-              margin: "0 auto 2rem",
-              lineHeight: 1.65,
-              fontFamily: "system-ui, sans-serif",
-            }}
-          >
-            Elk sjabloon is een afgewerkte uitnodiging — geen schets. Klik om hem te
-            bekijken en begin gratis te personaliseren.
-          </p>
-          <Link
-            href="/register"
-            style={{
-              display: "inline-block",
-              backgroundColor: "#8B2635",
-              color: "#FFFFFF",
-              padding: "0.75rem 2rem",
-              borderRadius: "9999px",
-              textDecoration: "none",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              fontFamily: "system-ui, sans-serif",
-            }}
-          >
-            Maak je uitnodiging — gratis
-          </Link>
-        </section>
+        <div style={{ textAlign: "center", padding: "60px 24px 40px" }}>
+          <p style={{ fontFamily: "sans-serif", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B2635", marginBottom: 10 }}>Sjablonen</p>
+          <h1 style={{ fontFamily: "serif", fontSize: "clamp(2rem,4vw,3rem)", color: "#16161D", marginBottom: 12 }}>19 handgemaakte ontwerpen</h1>
+          <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#9a8e88", maxWidth: 500, margin: "0 auto" }}>Elk sjabloon heeft een eigen openingsanimatie, kleurpalet en sfeer. Klik op een sjabloon om de live demo te zien.</p>
+        </div>
+
+        {/* Filter op opening stijl */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap", padding: "0 24px 32px" }}>
+          {openingStyles.map(style => (
+            <button key={style} onClick={() => setFilter(style)} style={{ padding: "8px 16px", borderRadius: 999, border: "none", background: filter === style ? "#8B2635" : "white", color: filter === style ? "white" : "#5a5550", fontFamily: "sans-serif", fontSize: 12, cursor: "pointer", border: filter === style ? "none" : "1px solid #e0dbd7" }}>
+              {style === "alle" ? "Alle stijlen" : OPENING_LABELS[style] || style}
+            </button>
+          ))}
+        </div>
 
         {/* Grid */}
-        <section
-          style={{
-            maxWidth: "90rem",
-            margin: "0 auto",
-            padding: "3rem 1.5rem 5rem",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
-              gap: "1.75rem",
-            }}
-          >
-            {templates.map((tpl) => (
-              <Link
-                key={tpl.slug}
-                href={`/templates/${tpl.slug}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <article className="tpl-card">
-                  {/* Template image */}
-                  <div
-                    style={{
-                      aspectRatio: "4/3",
-                      overflow: "hidden",
-                      backgroundColor: "#F5EDE8",
-                      position: "relative",
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={tpl.img}
-                      alt={tpl.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        objectPosition: "top",
-                        display: "block",
-                      }}
-                      loading="lazy"
-                    />
-                    {/* Price badge */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "0.75rem",
-                        right: "0.75rem",
-                        backgroundColor: "rgba(22,22,29,0.75)",
-                        backdropFilter: "blur(4px)",
-                        color: "#FFFFFF",
-                        fontSize: "0.75rem",
-                        fontFamily: "system-ui, sans-serif",
-                        fontWeight: 500,
-                        padding: "0.25rem 0.625rem",
-                        borderRadius: "9999px",
-                      }}
-                    >
-                      €{tpl.price}
-                    </div>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px 80px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 20 }}>
+          {filtered.map(t => (
+            <Link key={t.slug} href={`/templates/${t.slug}`} style={{ textDecoration: "none", display: "block" }}>
+              <div style={{ borderRadius: 18, overflow: "hidden", border: "1.5px solid #ece8e4", background: "white", transition: "transform 0.2s, box-shadow 0.2s", cursor: "pointer" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 16px 40px rgba(139,38,53,0.12)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
+                <div style={{ aspectRatio: "3/4", position: "relative", background: "#f5ede8" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imgErrors[t.slug] ? `https://sponsalia.app/assets/marketing/templates/${FALLBACK[t.slug]}` : `/assets/templates/${t.slug}.jpg`}
+                    alt={t.name}
+                    onError={() => setImgErrors(prev => ({ ...prev, [t.slug]: true }))}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                  <div style={{ position: "absolute", top: 10, left: 10, background: "rgba(255,255,255,0.92)", borderRadius: 999, padding: "4px 10px" }}>
+                    <span style={{ fontFamily: "sans-serif", fontSize: 10, color: "#5a5550" }}>{OPENING_LABELS[t.openingStyle]}</span>
                   </div>
-
-                  {/* Card body */}
-                  <div style={{ padding: "1.125rem 1.25rem 1.25rem" }}>
-                    <p
-                      style={{
-                        fontSize: "0.625rem",
-                        letterSpacing: "0.18em",
-                        textTransform: "uppercase",
-                        color: "#8B2635",
-                        fontFamily: "system-ui, sans-serif",
-                        fontWeight: 600,
-                        marginBottom: "0.375rem",
-                      }}
-                    >
-                      {tpl.tagline}
-                    </p>
-                    <h2
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, serif",
-                        fontSize: "1.3125rem",
-                        fontWeight: 600,
-                        color: "#16161D",
-                        marginBottom: "0.375rem",
-                      }}
-                    >
-                      {tpl.name}
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: "0.8125rem",
-                        color: "#6B6B76",
-                        fontFamily: "system-ui, sans-serif",
-                        lineHeight: 1.55,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {tpl.description}
-                    </p>
-
-                    <div
-                      style={{
-                        marginTop: "1rem",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "0.8125rem",
-                          color: "#8B2635",
-                          fontFamily: "system-ui, sans-serif",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Bekijk sjabloon →
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "#9CA3AF",
-                          fontFamily: "system-ui, sans-serif",
-                        }}
-                      >
-                        {tpl.colors.length} kleur{tpl.colors.length !== 1 ? "en" : ""}
-                      </span>
-                    </div>
-                  </div>
-                </article>
-              </Link>
-            ))}
-          </div>
-
-          {/* Bottom CTA */}
-          <div
-            style={{
-              marginTop: "4rem",
-              textAlign: "center",
-              padding: "3rem 1.5rem",
-              backgroundColor: "#FFFFFF",
-              borderRadius: "1.5rem",
-              border: "1px solid #E8E6E3",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
-                fontWeight: 600,
-                color: "#16161D",
-                marginBottom: "0.75rem",
-              }}
-            >
-              Geen van deze sjablonen past precies?
-            </h2>
-            <p
-              style={{
-                fontSize: "0.9375rem",
-                color: "#6B6B76",
-                fontFamily: "system-ui, sans-serif",
-                marginBottom: "1.75rem",
-                lineHeight: 1.65,
-              }}
-            >
-              We ontwerpen een uniek sjabloon speciaal voor jullie bruiloft — €249, klaar in 7 werkdagen.
-            </p>
-            <Link
-              href="/register"
-              style={{
-                display: "inline-block",
-                backgroundColor: "#16161D",
-                color: "#FFFFFF",
-                padding: "0.75rem 2rem",
-                borderRadius: "9999px",
-                textDecoration: "none",
-                fontSize: "0.8125rem",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              Op maat laten maken
+                </div>
+                <div style={{ padding: "14px 16px 16px" }}>
+                  <p style={{ fontFamily: "serif", fontSize: 18, color: "#16161D", marginBottom: 3 }}>{t.name}</p>
+                  <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", lineHeight: 1.45, marginBottom: 10 }}>{t.tagline}</p>
+                  <span style={{ fontFamily: "sans-serif", fontSize: 12, color: "#8B2635", fontWeight: 600 }}>Bekijken →</span>
+                </div>
+              </div>
             </Link>
-          </div>
-        </section>
-      </main>
-
+          ))}
+        </div>
+      </div>
       <Footer />
-    </div>
+    </>
   );
 }
