@@ -2,406 +2,308 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { getTemplate } from "@/lib/templates";
-import { Check, Music, X, Camera, MessageSquare } from "lucide-react";
-
-const MUSIC_URL = "https://cdn.pixabay.com/audio/2023/11/10/audio_d4d18e7aa3.mp3";
+import { Music, Heart, MapPin, Clock, Camera, MessageSquare, ChevronDown } from "lucide-react";
 
 type Wedding = {
-  id: string; partner1_first: string; partner1_last: string; partner2_first: string; partner2_last: string;
-  wedding_date: string; wedding_time: string; city: string; venue: string; address: string;
-  intro_text: string; welcome_message: string; template_slug: string; status: string;
-  show_photos: boolean; show_messages: boolean; show_rsvp: boolean; show_countdown: boolean;
+  id: string; partner1_first: string; partner2_first: string;
+  partner1_last: string; partner2_last: string;
+  wedding_date: string; wedding_time: string; venue: string; city: string;
+  address: string; welcome_message: string; template_slug: string;
+  show_rsvp: boolean; show_photos: boolean; show_messages: boolean; show_countdown: boolean;
+  primary_color: string; slug: string;
 };
-type Guest = { id: string; first_name: string; token: string };
+type Event = { id: string; name: string; event_date: string; start_time: string; end_time: string; venue: string; city: string; description: string; is_main: boolean; };
+type Guest = { id: string; first_name: string; last_name: string; token: string; };
 
-export default function PublicWedding() {
-  const { slug } = useParams() as { slug: string };
+const BLOOM = {
+  body: "/assets/templates/bloom/bl-cartoncino-body.webp",
+  line: "/assets/templates/bloom/bl-cartoncino-line.webp",
+  cornice_ink: "/assets/templates/bloom/bl-data-cornice-ink.webp",
+  cornice_leaf: "/assets/templates/bloom/bl-data-cornice-leaf.webp",
+  fascia: "/assets/templates/bloom/bl-fascia-righe-ink.webp",
+  fiocco: "/assets/templates/bloom/bl-fiocco-ink.webp",
+  fiocco_lungo: "/assets/templates/bloom/bl-fiocco-lungo-ink.webp",
+  colomba: "/assets/templates/bloom/bl-colomba-ink.webp",
+  hero_ink: "/assets/templates/bloom/bl-hero-pieno-ink.webp",
+  hero_leaf: "/assets/templates/bloom/bl-hero-pieno-leaf.webp",
+  wave: "/assets/templates/bloom/bl-wave.svg",
+  poster: "/assets/templates/bloom/avorio_rosa-poster.jpg",
+};
+
+export default function InvitePage() {
+  const params = useParams();
   const searchParams = useSearchParams();
-  const guestToken = searchParams.get("t");
+  const slug = params.slug as string;
+  const token = searchParams.get("t");
 
   const [wedding, setWedding] = useState<Wedding | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
   const [guest, setGuest] = useState<Guest | null>(null);
-  const [events, setEvents] = useState<{ id: string; name: string; event_date: string; start_time: string; venue: string; city: string; description: string }[]>([]);
-  const [photos, setPhotos] = useState<{ id: string; url: string; uploader_name: string }[]>([]);
-  const [msgs, setMsgs] = useState<{ id: string; author_name: string; content: string; created_at: string }[]>([]);
-  const [phase, setPhase] = useState<"closed" | "open">("closed");
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"uitnodiging" | "fotos" | "berichten">("uitnodiging");
+  const [phase, setPhase] = useState<"closed" | "opening" | "open">("closed");
   const [musicPlaying, setMusicPlaying] = useState(false);
-  const [showRsvp, setShowRsvp] = useState(false);
-  const [rsvpSent, setRsvpSent] = useState(false);
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
-  const [showMessageForm, setShowMessageForm] = useState(false);
+  const [rsvpStatus, setRsvpStatus] = useState<"idle" | "yes" | "no" | "done">("idle");
   const [rsvpName, setRsvpName] = useState("");
-  const [attending, setAttending] = useState<"yes" | "no" | null>(null);
-  const [diet, setDiet] = useState("");
-  const [rsvpMsg, setRsvpMsg] = useState("");
-  const [msgAuthor, setMsgAuthor] = useState("");
-  const [msgContent, setMsgContent] = useState("");
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploaderName, setUploaderName] = useState("");
-  const [uploadLoading, setUploadLoading] = useState(false);
+  const [rsvpDiet, setRsvpDiet] = useState("");
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [color, setColor] = useState("#8B2635");
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     async function load() {
-      const { data: w } = await supabase.from("weddings").select("*").eq("slug", slug).in("status", ["published", "preview"]).single();
-      if (!w) { setLoading(false); return; }
+      const { data: w } = await supabase.from("weddings").select("*").eq("slug", slug).single();
+      if (!w) return;
       setWedding(w);
-
-      const { data: evts } = await supabase.from("events").select("*").eq("wedding_id", w.id).order("sort_order");
-      setEvents(evts || []);
-
-      if (w.show_photos) {
-        const res = await fetch(`/api/photos?wedding_id=${w.id}`);
-        setPhotos(await res.json());
+      setColor(w.primary_color || "#8B2635");
+      if (w.wedding_date) {
+        const diff = new Date(w.wedding_date).getTime() - Date.now();
+        if (diff > 0) setCountdown({ days: Math.floor(diff / 86400000), hours: Math.floor((diff % 86400000) / 3600000), minutes: Math.floor((diff % 3600000) / 60000) });
       }
-      if (w.show_messages) {
-        const res = await fetch(`/api/messages?wedding_id=${w.id}`);
-        setMsgs(await res.json());
+      const { data: evs } = await supabase.from("events").select("*").eq("wedding_id", w.id).order("sort_order");
+      setEvents(evs || []);
+      if (token) {
+        const { data: g } = await supabase.from("guests").select("*").eq("token", token).single();
+        if (g) { setGuest(g); setRsvpName(`${g.first_name} ${g.last_name}`); await supabase.from("guests").update({ opened_at: new Date().toISOString(), status: "opened" }).eq("id", g.id); }
       }
-
-      if (guestToken) {
-        const { data: g } = await supabase.from("guests").select("*").eq("token", guestToken).single();
-        if (g) {
-          setGuest(g); setRsvpName(g.first_name);
-          await supabase.from("guests").update({ opened_at: new Date().toISOString(), status: "opened" }).eq("id", g.id);
-          const { data: existingRsvp } = await supabase.from("rsvps").select("id").eq("guest_id", g.id).single();
-          if (existingRsvp) setRsvpSent(true);
-        }
-      }
-
-      setLoading(false);
     }
     load();
-    return () => audioRef.current?.pause();
-  }, [slug, guestToken]);
+  }, [slug, token]);
 
-  // Countdown
-  useEffect(() => {
-    if (!wedding?.wedding_date) return;
-    const target = new Date(wedding.wedding_date).getTime();
-    const calc = () => {
-      const diff = target - Date.now();
-      if (diff <= 0) return;
-      setCountdown({ days: Math.floor(diff / 86400000), hours: Math.floor((diff % 86400000) / 3600000), minutes: Math.floor((diff % 3600000) / 60000) });
-    };
-    calc();
-    const t = setInterval(calc, 60000);
-    return () => clearInterval(t);
-  }, [wedding?.wedding_date]);
-
-  const toggleMusic = () => {
-    if (!audioRef.current) { audioRef.current = new Audio(MUSIC_URL); audioRef.current.loop = true; audioRef.current.volume = 0.3; }
-    if (musicPlaying) { audioRef.current.pause(); setMusicPlaying(false); }
-    else { audioRef.current.play().catch(() => {}); setMusicPlaying(true); }
+  const open = () => {
+    setPhase("opening");
+    setTimeout(() => setPhase("open"), 1200);
   };
 
-  const sendRsvp = async () => {
-    if (!rsvpName || !attending || !wedding) return;
-    await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wedding_id: wedding.id, guest_token: guestToken, name: rsvpName, attending: attending === "yes", diet, message: rsvpMsg }) });
-    setRsvpSent(true); setShowRsvp(false);
+  const submitRSVP = async (attending: boolean) => {
+    if (!wedding || !rsvpName) return;
+    await supabase.from("rsvps").insert({ wedding_id: wedding.id, guest_id: guest?.id || null, name: rsvpName, attending, diet: rsvpDiet, adults: 1 });
+    if (guest) await supabase.from("guests").update({ status: attending ? "confirmed" : "declined" }).eq("id", guest.id);
+    setRsvpStatus("done");
   };
-
-  const sendMessage = async () => {
-    if (!msgAuthor || !msgContent || !wedding) return;
-    await fetch("/api/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wedding_id: wedding.id, guest_token: guestToken, author_name: msgAuthor, content: msgContent }) });
-    setMsgs(m => [{ id: Date.now().toString(), author_name: msgAuthor, content: msgContent, created_at: new Date().toISOString() }, ...m]);
-    setMsgContent(""); setShowMessageForm(false);
-  };
-
-  const uploadPhoto = async () => {
-    if (!uploadFile || !wedding) return;
-    setUploadLoading(true);
-    const fd = new FormData();
-    fd.append("file", uploadFile); fd.append("wedding_id", wedding.id);
-    fd.append("uploader_name", uploaderName || guest?.first_name || "Gast");
-    if (guestToken) fd.append("guest_token", guestToken);
-    const res = await fetch("/api/photos", { method: "POST", body: fd });
-    const photo = await res.json();
-    if (photo.url) setPhotos(p => [photo, ...p]);
-    setUploadFile(null); setUploadLoading(false); setShowPhotoUpload(false); setActiveTab("fotos");
-  };
-
-  if (loading) return (
-    <div style={{ minHeight: "100vh", background: "#f5ede8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width: 36, height: 36, border: "2px solid #8B2635", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-    </div>
-  );
 
   if (!wedding) return (
-    <div style={{ minHeight: "100vh", background: "#f5ede8", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
-      <p style={{ fontFamily: "serif", fontSize: 24, color: "#16161D" }}>Uitnodiging niet gevonden</p>
-      <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#6b6560" }}>Controleer de link of vraag het bruidspaar om een nieuwe link.</p>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f9f0eb" }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{ width: 32, height: 32, border: `2px solid ${color}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
     </div>
   );
 
-  const template = getTemplate(wedding.template_slug);
   const namen = `${wedding.partner1_first} & ${wedding.partner2_first}`;
-  const datum = wedding.wedding_date ? new Date(wedding.wedding_date).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+  const datumLang = wedding.wedding_date ? new Date(wedding.wedding_date).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5ede8" }}>
-      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}.fade-up{animation:fadeUp 0.6s ease both}.pulse{animation:pulse 2s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}`}</style>
+    <div style={{ minHeight: "100vh", background: "#f9f0eb", fontFamily: "serif" }}>
+      <style>{`
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes ribbonDrop{from{opacity:0;transform:translateY(-30px) scaleY(0.8)}to{opacity:1;transform:translateY(0) scaleY(1)}}
+        @keyframes envelopeOpen{from{transform:scaleY(1)}to{transform:scaleY(0) translateY(-20px)}}
+        .fade-up{animation:fadeUp 0.8s ease both}
+        .fade-in{animation:fadeIn 0.6s ease both}
+        .pulse{animation:pulse 2s ease-in-out infinite}
+        @keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
+      `}</style>
 
       {/* Muziek knop */}
-      <button onClick={toggleMusic} style={{ position: "fixed", top: 16, right: 16, zIndex: 200, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.95)", border: "1px solid #e0cbc3", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
-        <Music size={16} style={{ color: musicPlaying ? "#8B2635" : "#9a8e88" }} />
+      <button onClick={() => setMusicPlaying(!musicPlaying)} style={{ position: "fixed", top: 16, right: 16, zIndex: 200, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.95)", border: `1px solid ${color}30`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
+        <Music size={15} style={{ color: musicPlaying ? color : "#9a8e88" }} />
       </button>
 
-      {/* GESLOTEN: envelop */}
+      {/* FASE 1: GESLOTEN ENVELOP */}
       {phase === "closed" && (
-        <div className="fade-up" onClick={() => setPhase("open")} style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 24 }}>
-          <div style={{ position: "relative", width: "min(300px, 80vw)", aspectRatio: "5/3.5", marginBottom: 28 }}>
-            <div style={{ position: "absolute", inset: 0, borderRadius: 12, background: "#fff8f5", border: "1px solid #e0cbc3", boxShadow: "0 20px 60px rgba(139,38,53,0.15)" }} />
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "52%", overflow: "hidden", borderRadius: "12px 12px 0 0" }}>
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #edddd5 50%, transparent 50%)" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(225deg, #edddd5 50%, transparent 50%)" }} />
+        <div onClick={open} style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 24 }}>
+          <div className="fade-up" style={{ position: "relative", width: "min(320px, 85vw)" }}>
+            {/* Envelop poster */}
+            <img src={BLOOM.poster} alt="Uitnodiging" style={{ width: "100%", borderRadius: 16, boxShadow: "0 24px 64px rgba(0,0,0,0.18)", display: "block" }} />
+            {/* Strik overlay */}
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -60%)", width: "70%", animation: "ribbonDrop 1s ease both 0.3s", opacity: 0 }}>
+              <img src={BLOOM.fiocco} alt="" style={{ width: "100%", filter: `hue-rotate(0deg)` }} />
             </div>
-            <div style={{ position: "absolute", bottom: 0, left: 0, width: "50%", height: "52%", background: "linear-gradient(315deg, #e5cec5 50%, transparent 50%)", borderBottomLeftRadius: 12 }} />
-            <div style={{ position: "absolute", bottom: 0, right: 0, width: "50%", height: "52%", background: "linear-gradient(225deg, #e5cec5 50%, transparent 50%)", borderBottomRightRadius: 12 }} />
-            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10, width: 52, height: 52, borderRadius: "50%", background: "radial-gradient(circle at 38% 38%, #b03545, #8B2635 50%, #701e2a)", border: "2px solid #701e2a", boxShadow: "0 4px 16px rgba(139,38,53,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "#f5ddd8", fontSize: 14, fontFamily: "serif", fontStyle: "italic" }}>CN</span>
+            {/* Namen */}
+            <div style={{ position: "absolute", bottom: "18%", left: "50%", transform: "translateX(-50%)", textAlign: "center", width: "80%" }}>
+              <p style={{ fontFamily: "serif", fontSize: "clamp(16px,4vw,22px)", color: color, lineHeight: 1.2 }}>{namen}</p>
+              {datumLang && <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#6b6560", marginTop: 4 }}>{datumLang}</p>}
             </div>
           </div>
-          <p style={{ fontFamily: "serif", fontSize: "clamp(18px,4vw,24px)", color: "#16161D", marginBottom: 6 }}>{namen}</p>
-          {guest && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", marginBottom: 20 }}>nodigt {guest.first_name} uit</p>}
-          <p className="pulse" style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8B2635", opacity: 0.75 }}>Tik om te openen</p>
+          <p className="pulse" style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: color, marginTop: 28, opacity: 0.75 }}>Tik om te openen</p>
         </div>
       )}
 
-      {/* OPEN: uitnodiging */}
+      {/* FASE 2: OPENING ANIMATIE */}
+      {phase === "opening" && (
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ position: "relative", width: "min(320px, 85vw)", animation: "envelopeOpen 1s ease forwards" }}>
+            <img src={BLOOM.poster} alt="" style={{ width: "100%", borderRadius: 16 }} />
+          </div>
+        </div>
+      )}
+
+      {/* FASE 3: OPEN UITNODIGING */}
       {phase === "open" && (
-        <div className="fade-up" style={{ maxWidth: 520, margin: "0 auto", padding: "16px 16px 100px" }}>
-          {/* Template afbeelding */}
-          {template && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={template.img} alt={template.name} style={{ width: "100%", borderRadius: "24px 24px 0 0", display: "block" }} />
-          )}
+        <div style={{ maxWidth: 520, margin: "0 auto", padding: "0 0 80px" }}>
 
-          {/* Hoofdkaart */}
-          <div style={{ background: "white", borderRadius: phase === "open" && template ? "0 0 24px 24px" : 24, padding: "32px 28px 28px", boxShadow: "0 20px 60px rgba(0,0,0,0.10)" }}>
-            <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B2635", textAlign: "center", marginBottom: 8 }}>Met liefde uitgenodigd</p>
-            <h1 style={{ fontFamily: "serif", fontSize: "clamp(2rem,6vw,2.8rem)", color: "#16161D", textAlign: "center", lineHeight: 1.1, marginBottom: 20 }}>{namen}</h1>
-            <div style={{ height: 1, background: "#ece8e4", marginBottom: 20 }} />
-            {datum && <p style={{ fontFamily: "sans-serif", fontSize: 15, color: "#16161D", textAlign: "center", fontWeight: 500, marginBottom: 4 }}>{datum}</p>}
-            {wedding.wedding_time && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", textAlign: "center", marginBottom: 4 }}>Aanvang {wedding.wedding_time} uur</p>}
-            {wedding.venue && <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#16161D", textAlign: "center", fontWeight: 500, marginTop: 12 }}>{wedding.venue}</p>}
-            {wedding.city && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", textAlign: "center" }}>{wedding.city}</p>}
+          {/* HERO — cartouche met rozen */}
+          <div className="fade-in" style={{ position: "relative", width: "100%", aspectRatio: "3/4", overflow: "hidden" }}>
+            <img src={BLOOM.body} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={BLOOM.hero_leaf} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={BLOOM.hero_ink} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: `sepia(1) saturate(3) hue-rotate(${color === "#8B2635" ? "300deg" : "200deg"})` }} />
+            {/* Namen in cartouche */}
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 60px" }}>
+              <p style={{ fontFamily: "sans-serif", fontSize: 9, letterSpacing: "0.25em", textTransform: "uppercase", color: color, marginBottom: 8, opacity: 0.8 }}>Met liefde uitgenodigd</p>
+              <p style={{ fontFamily: "serif", fontSize: "clamp(22px,5vw,32px)", color: "#16161D", textAlign: "center", lineHeight: 1.15 }}>{namen}</p>
+              <img src={BLOOM.wave} alt="" style={{ width: 120, margin: "10px auto", opacity: 0.4 }} />
+              {datumLang && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#5a5550", textAlign: "center" }}>{datumLang}</p>}
+            </div>
+          </div>
 
-            {/* Countdown */}
-            {wedding.show_countdown && countdown.days > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, margin: "20px 0", background: "#f9f5f1", borderRadius: 14, padding: "16px" }}>
+          {/* STRIK overgang */}
+          <div className="fade-up" style={{ display: "flex", justifyContent: "center", marginTop: -20, position: "relative", zIndex: 10 }}>
+            <img src={BLOOM.fiocco_lungo} alt="" style={{ width: 80, filter: `sepia(1) saturate(2) hue-rotate(${color === "#8B2635" ? "300deg" : "200deg"})` }} />
+          </div>
+
+          {/* DATUM & LOCATIE KAART */}
+          <div className="fade-up" style={{ margin: "0 16px", background: "white", borderRadius: 20, padding: "28px 24px", boxShadow: "0 8px 32px rgba(0,0,0,0.08)", position: "relative", overflow: "hidden" }}>
+            <img src={BLOOM.line} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.06, pointerEvents: "none" }} />
+            {/* Datum cornice */}
+            <div style={{ position: "relative", textAlign: "center", marginBottom: 20 }}>
+              <img src={BLOOM.cornice_leaf} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: 0.15, pointerEvents: "none" }} />
+              <img src={BLOOM.cornice_ink} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: 0.12, filter: `sepia(1) saturate(3) hue-rotate(300deg)`, pointerEvents: "none" }} />
+              <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88", marginBottom: 6, position: "relative" }}>Datum</p>
+              <p style={{ fontFamily: "serif", fontSize: 20, color: "#16161D", fontWeight: 500, position: "relative" }}>{datumLang}</p>
+              {wedding.wedding_time && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", marginTop: 2, position: "relative" }}>Aanvang {wedding.wedding_time} uur</p>}
+            </div>
+            <div style={{ height: 1, background: `${color}20`, margin: "16px 0" }} />
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88", marginBottom: 6 }}>Locatie</p>
+              {wedding.venue && <p style={{ fontFamily: "serif", fontSize: 18, color: "#16161D" }}>{wedding.venue}</p>}
+              {wedding.city && <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560" }}>{wedding.city}</p>}
+              {wedding.address && (
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(wedding.address + " " + wedding.city)}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 8, fontFamily: "sans-serif", fontSize: 12, color, textDecoration: "none" }}>
+                  <MapPin size={12} /> Route bekijken
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* COUNTDOWN */}
+          {wedding.show_countdown && countdown.days > 0 && (
+            <div className="fade-up" style={{ margin: "16px 16px 0", position: "relative" }}>
+              <img src={BLOOM.fascia} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", borderRadius: 16, opacity: 0.12, filter: `sepia(1) saturate(3) hue-rotate(300deg)` }} />
+              <div style={{ background: `${color}10`, borderRadius: 16, padding: "20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, position: "relative" }}>
                 {[{ v: countdown.days, l: "dagen" }, { v: countdown.hours, l: "uren" }, { v: countdown.minutes, l: "minuten" }].map(({ v, l }) => (
                   <div key={l} style={{ textAlign: "center" }}>
-                    <p style={{ fontFamily: "serif", fontSize: 28, color: "#8B2635", fontWeight: 600, lineHeight: 1 }}>{v}</p>
+                    <p style={{ fontFamily: "serif", fontSize: 32, color, fontWeight: 600, lineHeight: 1 }}>{v}</p>
                     <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", marginTop: 2 }}>{l}</p>
                   </div>
                 ))}
               </div>
-            )}
-
-            {wedding.welcome_message && (
-              <div style={{ background: "#fdf6f4", borderRadius: 12, padding: "16px 20px", margin: "20px 0" }}>
-                <p style={{ fontFamily: "serif", fontSize: 16, fontStyle: "italic", color: "#5a5550", lineHeight: 1.7, textAlign: "center" }}>"{wedding.welcome_message}"</p>
-              </div>
-            )}
-
-            {/* Events */}
-            {events.length > 0 && (
-              <div style={{ margin: "20px 0" }}>
-                <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88", marginBottom: 12 }}>Programma</p>
-                {events.map(ev => (
-                  <div key={ev.id} style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: "1px solid #ece8e4" }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#fdf6f4", border: "1px solid #e0cbc3", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: 16 }}>💍</span>
-                    </div>
-                    <div>
-                      <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#16161D", fontWeight: 500 }}>{ev.name}</p>
-                      {ev.start_time && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>{ev.start_time} uur</p>}
-                      {ev.venue && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#6b6560" }}>{ev.venue}{ev.city && `, ${ev.city}`}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ height: 1, background: "#ece8e4", margin: "20px 0" }} />
-
-            {/* RSVP */}
-            {wedding.show_rsvp && (
-              rsvpSent ? (
-                <div style={{ textAlign: "center", padding: "12px 0" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
-                    <Check size={20} style={{ color: "#16a34a" }} />
-                  </div>
-                  <p style={{ fontFamily: "serif", fontSize: 17, color: "#16161D" }}>Bedankt{guest ? `, ${guest.first_name}` : ""}!</p>
-                  <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#6b6560", marginTop: 4 }}>Je aanwezigheid is bevestigd.</p>
-                </div>
-              ) : (
-                <button onClick={() => setShowRsvp(true)} style={{ width: "100%", background: "#8B2635", color: "white", border: "none", borderRadius: 999, padding: "16px", fontFamily: "sans-serif", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
-                  Bevestig je aanwezigheid
-                </button>
-              )
-            )}
-          </div>
-
-          {/* Tabs: Foto's & Berichten */}
-          {(wedding.show_photos || wedding.show_messages) && (
-            <div style={{ marginTop: 20 }}>
-              <div style={{ display: "flex", gap: 0, background: "white", borderRadius: 12, border: "1px solid #ece8e4", padding: 4, marginBottom: 16 }}>
-                {[
-                  { id: "uitnodiging", label: "Uitnodiging" },
-                  ...(wedding.show_photos ? [{ id: "fotos", label: `Foto's (${photos.length})` }] : []),
-                  ...(wedding.show_messages ? [{ id: "berichten", label: `Berichten (${msgs.length})` }] : []),
-                ].map(t => (
-                  <button key={t.id} onClick={() => setActiveTab(t.id as typeof activeTab)} style={{ flex: 1, padding: "10px 8px", borderRadius: 8, border: "none", background: activeTab === t.id ? "#8B2635" : "transparent", color: activeTab === t.id ? "white" : "#6b6560", fontFamily: "sans-serif", fontSize: 12, cursor: "pointer" }}>{t.label}</button>
-                ))}
-              </div>
-
-              {/* Foto's */}
-              {activeTab === "fotos" && (
-                <div>
-                  <button onClick={() => setShowPhotoUpload(true)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "white", border: "1.5px dashed #e0cbc3", borderRadius: 14, padding: "16px", fontFamily: "sans-serif", fontSize: 14, color: "#8B2635", cursor: "pointer", marginBottom: 16 }}>
-                    <Camera size={16} /> Upload je foto's
-                  </button>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
-                    {photos.map(p => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <div key={p.id} style={{ borderRadius: 10, overflow: "hidden", aspectRatio: "1", background: "#f0ebe8" }}>
-                        <img src={p.url} alt={p.uploader_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      </div>
-                    ))}
-                    {photos.length === 0 && <p style={{ gridColumn: "span 2", fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88", textAlign: "center", padding: "32px" }}>Nog geen foto's. Upload de eerste!</p>}
-                  </div>
-                </div>
-              )}
-
-              {/* Berichten */}
-              {activeTab === "berichten" && (
-                <div>
-                  <button onClick={() => setShowMessageForm(true)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "white", border: "1.5px dashed #e0cbc3", borderRadius: 14, padding: "16px", fontFamily: "sans-serif", fontSize: 14, color: "#8B2635", cursor: "pointer", marginBottom: 16 }}>
-                    <MessageSquare size={16} /> Laat een bericht achter
-                  </button>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    {msgs.map(m => (
-                      <div key={m.id} style={{ background: "white", borderRadius: 14, padding: "16px 18px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
-                        <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#8B2635", fontWeight: 600, marginBottom: 6 }}>{m.author_name}</p>
-                        <p style={{ fontFamily: "serif", fontSize: 15, fontStyle: "italic", color: "#5a5550", lineHeight: 1.6 }}>"{m.content}"</p>
-                      </div>
-                    ))}
-                    {msgs.length === 0 && <p style={{ fontFamily: "sans-serif", fontSize: 14, color: "#9a8e88", textAlign: "center", padding: "32px" }}>Nog geen berichten. Wees de eerste!</p>}
-                  </div>
-                </div>
-              )}
             </div>
           )}
-        </div>
-      )}
 
-      {/* RSVP Modal */}
-      {showRsvp && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setShowRsvp(false)}>
-          <div style={{ background: "white", borderRadius: "24px 24px 0 0", padding: "28px 24px 48px", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <h3 style={{ fontFamily: "serif", fontSize: 22, color: "#16161D" }}>Bevestig je aanwezigheid</h3>
-              <button onClick={() => setShowRsvp(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} style={{ color: "#9a8e88" }} /></button>
+          {/* PERSOONLIJK BERICHT */}
+          {wedding.welcome_message && (
+            <div className="fade-up" style={{ margin: "16px 16px 0", background: "white", borderRadius: 20, padding: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", textAlign: "center", position: "relative", overflow: "hidden" }}>
+              <img src={BLOOM.line} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.05, pointerEvents: "none" }} />
+              <p style={{ fontFamily: "serif", fontSize: 16, fontStyle: "italic", color: "#5a5550", lineHeight: 1.75, position: "relative" }}>"{wedding.welcome_message}"</p>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div>
-                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Jouw naam</label>
-                <input value={rsvpName} onChange={e => setRsvpName(e.target.value)} style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+          )}
+
+          {/* PROGRAMMA */}
+          {events.length > 0 && (
+            <div className="fade-up" style={{ margin: "16px 16px 0" }}>
+              <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88", marginBottom: 12, paddingLeft: 4 }}>Programma</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {events.map(ev => (
+                  <div key={ev.id} style={{ background: "white", borderRadius: 14, padding: "16px 18px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", display: "flex", gap: 14, alignItems: "flex-start" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Clock size={14} style={{ color }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: "serif", fontSize: 16, color: "#16161D", marginBottom: 2 }}>{ev.name}</p>
+                      {ev.start_time && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88" }}>{ev.start_time}{ev.end_time ? ` – ${ev.end_time}` : ""}</p>}
+                      {ev.venue && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#6b6560" }}>{ev.venue}{ev.city ? `, ${ev.city}` : ""}</p>}
+                      {ev.description && <p style={{ fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginTop: 4, lineHeight: 1.5 }}>{ev.description}</p>}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 8 }}>Kom je?</label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {([["yes", "✓  Ik kom!"], ["no", "✗  Ik kan niet"]] as const).map(([val, label]) => (
-                    <button key={val} onClick={() => setAttending(val)} style={{ padding: "13px", borderRadius: 12, border: `1.5px solid ${attending === val ? "#8B2635" : "#e0dbd7"}`, background: attending === val ? "#8B2635" : "white", color: attending === val ? "white" : "#5a5550", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer", fontWeight: attending === val ? 600 : 400 }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {attending === "yes" && (
-                <div>
-                  <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Dieetwensen</label>
-                  <input value={diet} onChange={e => setDiet(e.target.value)} placeholder="Vegetarisch, glutenvrij..." style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
-                </div>
-              )}
-              <div>
-                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Bericht</label>
-                <textarea value={rsvpMsg} onChange={e => setRsvpMsg(e.target.value)} rows={2} placeholder="Schrijf iets liefs..." style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none", resize: "none", boxSizing: "border-box" }} />
-              </div>
-              <button onClick={sendRsvp} disabled={!rsvpName || !attending} style={{ background: "#8B2635", color: "white", border: "none", borderRadius: 999, padding: "15px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, cursor: !rsvpName || !attending ? "not-allowed" : "pointer", opacity: !rsvpName || !attending ? 0.5 : 1 }}>
-                Bevestig mijn aanwezigheid
-              </button>
             </div>
+          )}
+
+          {/* RSVP */}
+          {wedding.show_rsvp && (
+            <div className="fade-up" style={{ margin: "16px 16px 0", background: "white", borderRadius: 20, padding: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", position: "relative", overflow: "hidden" }}>
+              <img src={BLOOM.fascia} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.06, borderRadius: 20, pointerEvents: "none" }} />
+              <div style={{ position: "relative" }}>
+                <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#9a8e88", marginBottom: 4 }}>RSVP</p>
+                <p style={{ fontFamily: "serif", fontSize: 20, color: "#16161D", marginBottom: 16 }}>Ben jij erbij?</p>
+                {rsvpStatus === "done" ? (
+                  <div style={{ textAlign: "center", padding: "16px 0" }}>
+                    <Heart size={28} style={{ color, margin: "0 auto 8px" }} />
+                    <p style={{ fontFamily: "serif", fontSize: 18, color: "#16161D" }}>Bedankt voor je bevestiging!</p>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", display: "block", marginBottom: 5 }}>Naam</label>
+                      <input value={rsvpName} onChange={e => setRsvpName(e.target.value)} placeholder="Jouw naam" style={{ border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "10px 14px", fontFamily: "sans-serif", fontSize: 14, width: "100%", boxSizing: "border-box", outline: "none" }} />
+                    </div>
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ fontFamily: "sans-serif", fontSize: 11, color: "#9a8e88", display: "block", marginBottom: 5 }}>Dieetwensen (optioneel)</label>
+                      <input value={rsvpDiet} onChange={e => setRsvpDiet(e.target.value)} placeholder="Vegetarisch, allergieën..." style={{ border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "10px 14px", fontFamily: "sans-serif", fontSize: 14, width: "100%", boxSizing: "border-box", outline: "none" }} />
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      <button onClick={() => submitRSVP(true)} style={{ background: color, color: "white", border: "none", borderRadius: 999, padding: "13px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>✓ Ik kom!</button>
+                      <button onClick={() => submitRSVP(false)} style={{ background: "white", color: "#5a5550", border: "1.5px solid #e0dbd7", borderRadius: 999, padding: "13px", fontFamily: "sans-serif", fontSize: 14, cursor: "pointer" }}>Ik kan helaas niet</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* DUIF decoratie */}
+          <div style={{ display: "flex", justifyContent: "center", margin: "24px 0 8px" }}>
+            <img src={BLOOM.colomba} alt="" style={{ width: 48, opacity: 0.3, filter: `sepia(1) saturate(3) hue-rotate(300deg)` }} />
+          </div>
+
+          {/* FOTO UPLOAD */}
+          {wedding.show_photos && (
+            <div className="fade-up" style={{ margin: "0 16px" }}>
+              <div style={{ background: "white", borderRadius: 20, padding: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", textAlign: "center" }}>
+                <Camera size={24} style={{ color, margin: "0 auto 8px" }} />
+                <p style={{ fontFamily: "serif", fontSize: 18, color: "#16161D", marginBottom: 4 }}>Deel een foto</p>
+                <p style={{ fontFamily: "sans-serif", fontSize: 13, color: "#9a8e88", marginBottom: 16 }}>Upload jouw favoriete moment van deze dag</p>
+                <label style={{ display: "inline-block", background: `${color}15`, color, border: `1.5px solid ${color}40`, borderRadius: 999, padding: "10px 20px", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer" }}>
+                  Foto kiezen
+                  <input type="file" accept="image/*" style={{ display: "none" }} />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* GASTENBOEK */}
+          {wedding.show_messages && (
+            <div className="fade-up" style={{ margin: "16px 16px 0" }}>
+              <div style={{ background: "white", borderRadius: 20, padding: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                  <MessageSquare size={18} style={{ color }} />
+                  <p style={{ fontFamily: "serif", fontSize: 18, color: "#16161D" }}>Laat een bericht achter</p>
+                </div>
+                <textarea rows={3} placeholder="Schrijf een persoonlijk bericht voor het bruidspaar..." style={{ border: "1.5px solid #e0dbd7", borderRadius: 12, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 13, width: "100%", boxSizing: "border-box", outline: "none", resize: "vertical", marginBottom: 10 }} />
+                <button style={{ background: color, color: "white", border: "none", borderRadius: 999, padding: "11px 20px", fontFamily: "sans-serif", fontSize: 13, cursor: "pointer", width: "100%" }}>
+                  Bericht sturen
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <div style={{ textAlign: "center", padding: "32px 16px 0" }}>
+            <img src={BLOOM.fiocco} alt="" style={{ width: 40, opacity: 0.3, margin: "0 auto 12px", display: "block" }} />
+            <p style={{ fontFamily: "sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#c0b8b4" }}>Casa Nomada · Digitale trouwuitnodigingen</p>
           </div>
         </div>
       )}
-
-      {/* Foto upload modal */}
-      {showPhotoUpload && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setShowPhotoUpload(false)}>
-          <div style={{ background: "white", borderRadius: "24px 24px 0 0", padding: "28px 24px 48px", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <h3 style={{ fontFamily: "serif", fontSize: 22, color: "#16161D" }}>Foto uploaden</h3>
-              <button onClick={() => setShowPhotoUpload(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} /></button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {!guest && (
-                <div>
-                  <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Jouw naam</label>
-                  <input value={uploaderName} onChange={e => setUploaderName(e.target.value)} placeholder="Sophie" style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
-                </div>
-              )}
-              <div>
-                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Selecteer foto's (max 15MB)</label>
-                <input type="file" accept="image/*" multiple onChange={e => e.target.files && setUploadFile(e.target.files[0])} style={{ fontFamily: "sans-serif", fontSize: 13 }} />
-              </div>
-              <button onClick={uploadPhoto} disabled={!uploadFile || uploadLoading} style={{ background: "#8B2635", color: "white", border: "none", borderRadius: 999, padding: "15px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, cursor: !uploadFile || uploadLoading ? "not-allowed" : "pointer", opacity: !uploadFile || uploadLoading ? 0.5 : 1 }}>
-                {uploadLoading ? "Uploaden..." : "Upload foto"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bericht modal */}
-      {showMessageForm && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setShowMessageForm(false)}>
-          <div style={{ background: "white", borderRadius: "24px 24px 0 0", padding: "28px 24px 48px", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <h3 style={{ fontFamily: "serif", fontSize: 22, color: "#16161D" }}>Laat een bericht achter</h3>
-              <button onClick={() => setShowMessageForm(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} /></button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {!guest && (
-                <div>
-                  <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Jouw naam</label>
-                  <input value={msgAuthor} onChange={e => setMsgAuthor(e.target.value)} style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
-                </div>
-              )}
-              {guest && !msgAuthor && setMsgAuthor(guest.first_name)}
-              <div>
-                <label style={{ display: "block", fontFamily: "sans-serif", fontSize: 12, color: "#9a8e88", marginBottom: 6 }}>Jouw bericht</label>
-                <textarea value={msgContent} onChange={e => setMsgContent(e.target.value)} rows={4} placeholder="Schrijf een mooi wens voor het bruidspaar..." style={{ width: "100%", border: "1.5px solid #e0dbd7", borderRadius: 10, padding: "12px 14px", fontFamily: "sans-serif", fontSize: 14, outline: "none", resize: "none", boxSizing: "border-box" }} />
-              </div>
-              <button onClick={sendMessage} disabled={!msgContent || (!guest && !msgAuthor)} style={{ background: "#8B2635", color: "white", border: "none", borderRadius: 999, padding: "15px", fontFamily: "sans-serif", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                Verstuur bericht
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div style={{ textAlign: "center", padding: "20px", maxWidth: 520, margin: "0 auto" }}>
-        <p style={{ fontFamily: "sans-serif", fontSize: 11, color: "rgba(90,80,72,0.4)" }}>Casa Nomada · Digitale trouwkaarten</p>
-      </div>
     </div>
   );
 }
