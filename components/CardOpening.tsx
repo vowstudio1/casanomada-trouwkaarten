@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import BloomOpening from "./BloomOpening";
+import BloomInvite from "./BloomInvite";
 
 type Props = {
-  templateImg:  string;
-  templateName: string;
+  templateImg:   string;
+  templateName:  string;
   templateSlug?: string;
-  namen?:       string;
-  datumLang?:   string;
-  color?:       string;
-  onComplete?:  () => void;
+  namen?:        string;
+  datumLang?:    string;
+  color?:        string;
+  onComplete?:   () => void;
 };
 
 export default function CardOpening({
@@ -22,6 +22,37 @@ export default function CardOpening({
   color     = "#8B2635",
   onComplete,
 }: Props) {
+  const [opened, setOpened] = useState(false);
+
+  // Bloom: gebruik de volledige BloomInvite als demo
+  if (templateSlug === "bloom") {
+    if (!opened) {
+      return (
+        <BloomInvite
+          namen={namen}
+          datumLang={datumLang}
+          weddingTime="15:00"
+          venue="Landgoed De Hooge Vuursche"
+          stad="Baarn"
+          welcomeMessage="Wij zijn zo blij dat jullie erbij zijn op onze grote dag."
+          events={[
+            { id: "1", name: "Ceremonie",     start_time: "15:00", end_time: "16:00", venue: "Landgoed De Hooge Vuursche", city: "Baarn", description: "", is_main: true,  event_date: "" },
+            { id: "2", name: "Receptie",      start_time: "16:00", end_time: "18:00", venue: "Terras",                    city: "Baarn", description: "", is_main: false, event_date: "" },
+            { id: "3", name: "Diner & Feest", start_time: "18:00", end_time: "23:59", venue: "Grote Zaal",                city: "Baarn", description: "", is_main: false, event_date: "" },
+          ]}
+          color={color}
+          showRsvp={true}
+          showPhotos={true}
+          showMessages={true}
+          showCountdown={false}
+          demoMode={false}
+        />
+      );
+    }
+    return null;
+  }
+
+  // Overige templates: simpele klik → preview afbeelding
   const [phase, setPhase] = useState<"idle" | "open">("idle");
 
   const handleComplete = () => {
@@ -29,19 +60,6 @@ export default function CardOpening({
     onComplete?.();
   };
 
-  // Bloom krijgt de echte interactieve opening
-  if (templateSlug === "bloom" && phase === "idle") {
-    return (
-      <BloomOpening
-        namen={namen}
-        datumLang={datumLang}
-        color={color}
-        onComplete={handleComplete}
-      />
-    );
-  }
-
-  // Na opening (alle templates): toon de preview afbeelding
   if (phase === "open") {
     return (
       <div style={{ position: "absolute", inset: 0, overflowY: "auto", overflowX: "hidden" }}>
@@ -60,12 +78,8 @@ export default function CardOpening({
     );
   }
 
-  // Overige templates: simpele klik-om-te-openen
   return (
-    <div
-      onClick={handleComplete}
-      style={{ position: "absolute", inset: 0, cursor: "pointer", overflow: "hidden" }}
-    >
+    <div onClick={handleComplete} style={{ position: "absolute", inset: 0, cursor: "pointer", overflow: "hidden" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={templateImg} alt={templateName} style={{ width: "100%", display: "block", filter: "brightness(0.97)" }} />
       <div style={{
