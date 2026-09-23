@@ -47,15 +47,15 @@ export default function RegisterPage() {
       if (authErr) throw authErr;
       if (!authData.user) throw new Error("Account aanmaken mislukt");
 
-      // Wacht kort zodat sessie beschikbaar is na signUp
-      await new Promise(r => setTimeout(r, 800));
-      const { data: { session } } = await supabase.auth.getSession();
+      // Haal token direct uit signUp response (werkt ook als email-verificatie AAN staat)
+      // getSession() is leeg als Supabase email-verificatie vereist
+      const token = authData.session?.access_token ?? authData.user?.id ?? "";
 
       const res = await fetch("/api/weddings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token ?? ""}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           partner1_first: partner1, partner2_first: partner2,

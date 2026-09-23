@@ -4,7 +4,22 @@ import { getSupabaseAdmin, getUserFromToken } from '@/lib/supabase-server';
 async function getAuth(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) throw new Error('Geen token');
-  return getUserFromToken(token);
+
+  // Probeer eerst als JWT access token
+  try {
+    return await getUserFromToken(token);
+  } catch (_) {
+    // Fallback: als het een user_id UUID is (bij email-verificatie flow)
+    // dan halen we de user direct op via service role
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(token)) {
+      const supabase = getSupabaseAdmin();
+      const { data: { user }, error } = await supabase.auth.admin.getUserById(token);
+      if (error || !user) throw new Error('Gebruiker niet gevonden');
+      return user;
+    }
+    throw new Error('Ongeldig token');
+  }
 }
 
 export async function GET(req: NextRequest) {
