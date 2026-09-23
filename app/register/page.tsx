@@ -47,10 +47,16 @@ export default function RegisterPage() {
       if (authErr) throw authErr;
       if (!authData.user) throw new Error("Account aanmaken mislukt");
 
+      // Wacht kort zodat sessie beschikbaar is na signUp
+      await new Promise(r => setTimeout(r, 800));
       const { data: { session } } = await supabase.auth.getSession();
+
       const res = await fetch("/api/weddings", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token ?? ""}`,
+        },
         body: JSON.stringify({
           partner1_first: partner1, partner2_first: partner2,
           wedding_date: date, wedding_time: time,
@@ -58,8 +64,10 @@ export default function RegisterPage() {
         }),
       });
       const wedding = await res.json();
-      if (wedding.id) router.push("/dashboard");
-      else throw new Error("Bruiloft aanmaken mislukt");
+      if (!res.ok || !wedding.id) {
+        throw new Error(wedding.error || `Serverfout (${res.status}) — controleer Netlify env vars`);
+      }
+      router.push("/dashboard");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Er ging iets mis");
     } finally { setLoading(false); }
