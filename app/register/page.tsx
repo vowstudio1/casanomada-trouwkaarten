@@ -46,25 +46,25 @@ export default function RegisterPage() {
         options: { data: { first_name: firstName, last_name: lastName } }
       });
 
-      let token = authData?.session?.access_token ?? "";
+      // Haal user_id op — direct uit signUp of via signIn fallback
+      let userId = authData?.user?.id ?? "";
+      let accessToken = authData?.session?.access_token ?? "";
 
-      // Als signUp geen sessie gaf (bijv. user bestaat al of email-verificatie aan),
-      // probeer dan in te loggen om een geldig token te krijgen
-      if (!token) {
+      if (!accessToken) {
         const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
         if (signInErr) throw signInErr;
-        token = signInData.session?.access_token ?? "";
+        userId = signInData.user?.id ?? userId;
+        accessToken = signInData.session?.access_token ?? "";
       }
 
-      if (!token) throw new Error("Kon geen sessie starten — controleer email en wachtwoord");
-      const user = authData?.user ?? (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error("Account aanmaken mislukt");
+      if (!userId) throw new Error("Account aanmaken mislukt");
 
       const res = await fetch("/api/weddings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "X-User-Id": userId,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           partner1_first: partner1, partner2_first: partner2,
