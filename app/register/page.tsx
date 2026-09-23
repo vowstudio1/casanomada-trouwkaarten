@@ -40,16 +40,25 @@ export default function RegisterPage() {
   const handleSubmit = async () => {
     setLoading(true); setError("");
     try {
+      // Probeer registreren
       const { data: authData, error: authErr } = await supabase.auth.signUp({
         email, password,
         options: { data: { first_name: firstName, last_name: lastName } }
       });
-      if (authErr) throw authErr;
-      if (!authData.user) throw new Error("Account aanmaken mislukt");
 
-      // Haal token direct uit signUp response (werkt ook als email-verificatie AAN staat)
-      // getSession() is leeg als Supabase email-verificatie vereist
-      const token = authData.session?.access_token ?? authData.user?.id ?? "";
+      let token = authData?.session?.access_token ?? "";
+
+      // Als signUp geen sessie gaf (bijv. user bestaat al of email-verificatie aan),
+      // probeer dan in te loggen om een geldig token te krijgen
+      if (!token) {
+        const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInErr) throw signInErr;
+        token = signInData.session?.access_token ?? "";
+      }
+
+      if (!token) throw new Error("Kon geen sessie starten — controleer email en wachtwoord");
+      const user = authData?.user ?? (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error("Account aanmaken mislukt");
 
       const res = await fetch("/api/weddings", {
         method: "POST",
