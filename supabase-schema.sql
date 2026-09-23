@@ -465,3 +465,24 @@ INSERT INTO music_tracks (wedding_id, name, url, is_library, sort_order) VALUES
   (NULL, 'Dolce Vita', 'https://cdn.pixabay.com/audio/2022/11/22/audio_febc508520.mp3', TRUE, 4)
 ON CONFLICT DO NOTHING;
 
+
+-- ============================================
+-- STORAGE BUCKET: photos
+-- Aanmaken via Supabase dashboard of deze SQL:
+-- ============================================
+-- NB: storage.buckets is alleen beschikbaar via service_role
+-- Maak "photos" bucket aan in Supabase dashboard:
+--   Storage → New bucket → Name: "photos" → Public: ✓
+--
+-- Dan deze RLS policies voor de bucket:
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('photos', 'photos', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Gasten mogen foto uploaden"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'photos');
+
+CREATE POLICY "Foto's zijn publiek leesbaar"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'photos');

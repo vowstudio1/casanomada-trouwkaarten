@@ -95,6 +95,40 @@ export default function InvitePage() {
     });
   };
 
+  const handlePhotoUpload = async (file: File) => {
+    // 1. Upload naar Supabase Storage bucket "photos"
+    const ext      = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filename = `${wedding.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { data: upload, error: uploadError } = await supabase.storage
+      .from("photos")
+      .upload(filename, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      console.error("Upload mislukt:", uploadError.message);
+      return;
+    }
+
+    // 2. Publieke URL ophalen
+    const { data: { publicUrl } } = supabase.storage
+      .from("photos")
+      .getPublicUrl(upload.path);
+
+    // 3. Rij in photos tabel aanmaken
+    await supabase.from("photos").insert({
+      wedding_id:    wedding.id,
+      guest_id:      guest?.id || null,
+      uploader_name: guest ? `${guest.first_name} ${guest.last_name}`.trim() : "Gast",
+      url:           publicUrl,
+      file_size:     file.size,
+      status:        "approved",
+    });
+  };
+
   return (
     <BloomInvite
       namen={namen}
@@ -112,6 +146,7 @@ export default function InvitePage() {
       showCountdown={wedding.show_countdown}
       onRsvp={handleRsvp}
       onMessage={handleMessage}
+      onPhotoUpload={handlePhotoUpload}
     />
   );
 }
