@@ -1272,30 +1272,15 @@ export default function BloomInvite({
         </header>
 
         {/* Lange strik decoratie */}
-        <div className="bl-lungo" aria-hidden style={{ ...reveal(1.40), marginTop: -16, position: "relative", zIndex: 5 }}>
+        <div className="bl-lungo" aria-hidden style={{ ...reveal(1.40), marginTop: -16, zIndex: 5 }}>
           <img
             src={B.lungo}
             alt=""
             style={{
               height: "clamp(52px, 10vw, 76px)",
               width: "auto",
-              WebkitMaskImage: `url(${B.lungo})`,
-              maskImage: `url(${B.lungo})`,
-              opacity: 0,
-              background: C.gold,
-            }}
-          />
-          {/* Fallback voor browsers zonder mask-image */}
-          <img
-            src={B.lungo}
-            alt=""
-            style={{
-              height: "clamp(52px, 10vw, 76px)",
-              width: "auto",
-              filter: `sepia(1) saturate(2) hue-rotate(330deg) brightness(1.05)`,
-              opacity: 0.8,
-              position: "absolute",
-              top: 0,
+              filter: "sepia(1) saturate(2) hue-rotate(330deg) brightness(1.05)",
+              opacity: 0.82,
             }}
           />
         </div>
